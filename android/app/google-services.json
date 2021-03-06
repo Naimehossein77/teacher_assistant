@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "381764101845",
+    "firebase_url": "https://flutterteacherassistant-default-rtdb.firebaseio.com",
+    "project_id": "flutterteacherassistant",
+    "storage_bucket": "flutterteacherassistant.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381764101845:android:baa4b9e9bc60a83defa45c",
+        "android_client_info": {
+          "package_name": "com.example.teacher_assistant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "381764101845-lj5hec0nnddrlcduvmtkaged1sstmld1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.teacher_assistant",
+            "certificate_hash": "2f99919072a3cc0ef2b65f34fb7dc6905cfe37c3"
+          }
+        },
+        {
+          "client_id": "381764101845-i6mur9k7emlpbuqpu51m78ki4784nd9p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9SrfxcdD6E1LW8xbIoClOgOAj8afen6U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "381764101845-i6mur9k7emlpbuqpu51m78ki4784nd9p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
