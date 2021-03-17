@@ -15,6 +15,46 @@
 //   _homeState createState() => _homeState();
 // }
 
+
+
+
+
+
+// (BuildContext context, int index) {
+//             return Dismissible(
+//               key: Key(widget.boxlist.length.toString()),
+//               onDismissed: (direction) {
+//                 // Remove the item from the data source.
+//                 setState(() {
+//                   widget.boxlist.removeAt(index);
+//                   cnt--;
+//                 });
+//               },
+//               child: Column(
+//                 children: [
+//                   widget.boxlist[index],
+//                   SizedBox(
+//                     height: 3,
+//                   )
+//                 ],
+//               ), //your child here (maybe listivew)
+//             );
+//           },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // class _homeState extends State<home> {
 //   @override
 //   Widget build(BuildContext context) {
