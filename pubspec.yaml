@@ -37,12 +37,15 @@ dependencies:
   connectivity:
   top_snackbar_flutter: 
   page_transition: ^1.1.7+6
-  flutter_bounce: ^1.0.8
+  bouncing_widget: ^1.2.3
   uuid:
   adobe_xd: ^1.1.0+1
   hexcolor: 
   tab_indicator_styler: ^1.0.0
-  anim_search_bar: 
+  shimmer: ^1.1.2
+  google_fonts: 
+  flutter_bounce:
+  
   
 
 

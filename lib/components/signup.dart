@@ -36,7 +36,7 @@ class _signupState extends State<signup> {
     final mwidth = MediaQuery.of(context).size.width;
     FocusScopeNode currentFocus = FocusScope.of(context);
     User user = FirebaseAuth.instance.currentUser;
-    Future<void> addUser(String documentID) async{
+    Future<void> addUser(String documentID) async {
       // Call the user's CollectionReference to add a new user
       users
           .doc(documentID)
@@ -44,7 +44,7 @@ class _signupState extends State<signup> {
             'first_name': firstName.text,
             'last_name': lastName.text, // John Doe
             'Dept.': sirdept.text, // Stokes and Sons
-          },SetOptions(merge: true))
+          }, SetOptions(merge: true))
           .then((value) => print("User Added"))
           .catchError(
               (error) => print("Failed to add user: User already available"));
@@ -53,8 +53,10 @@ class _signupState extends State<signup> {
     return loader
         ? Loading()
         : GestureDetector(
-          onTap: (){if (!currentFocus.hasPrimaryFocus) currentFocus.unfocus();},
-          child: Scaffold(
+            onTap: () {
+              if (!currentFocus.hasPrimaryFocus) currentFocus.unfocus();
+            },
+            child: Scaffold(
               appBar: AppBar(
                 title: Text('SignUp'),
                 actions: [
@@ -68,7 +70,7 @@ class _signupState extends State<signup> {
                 child: Form(
                   key: _formkey,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 100.0),
+                    padding: EdgeInsets.only(top: mheight * .15),
                     child: Center(
                       child: Container(
                         width: mwidth * .80,
@@ -211,52 +213,75 @@ class _signupState extends State<signup> {
                                 obscureText: true,
                               ),
                             ),
-                            Text(
-                              warning,
-                              style:
-                                  TextStyle(fontSize: 14, color: Colors.red[700]),
-                            ),
-                            RaisedButton(
-                              onPressed: () async {
-                                if (_formkey.currentState.validate()) {
-                                  print('null printed');
-
-                                  print('Signup Successful');
-                                }
-                                try {
-                                  UserCredential userCredential =
-                                      await FirebaseAuth.instance
-                                          .createUserWithEmailAndPassword(
-                                    email: email.text,
-                                    password: password.text,
-                                  )
-                                          .then((_) {
-                                    addUser(email.text + 'doc1');
-
-                                    Navigator.of(context).pushNamedAndRemoveUntil(
-                                        '/login',
-                                        (Route<dynamic> route) => false);
-                                    return null;
-                                  });
-                                } on FirebaseAuthException catch (e) {
-                                  if (e.code == 'weak-password') {
-                                    print('The password provided is too weak.');
-                                  } else if (e.code == 'email-already-in-use') {
-                                    setState(() {
-                                      warning =
-                                          'Email account already exists. Try another email.';
-                                    });
-
-                                    print(
-                                        'The account already exists for that email.');
-                                  }
-                                }
-                              },
+                            Padding(
+                              padding: const EdgeInsets.all(3),
                               child: Text(
-                                'Sign Up',
-                                style: TextStyle(color: Colors.white),
+                                warning,
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.red[700]),
                               ),
-                              color: Colors.pink,
+                            ),
+                            Container(
+                              height: 60,
+                              child: RaisedButton(
+                                onPressed: () async {
+                                  if (_formkey.currentState.validate()) {
+                                    print('Signup Successful');
+                                  }
+                                  try {
+                                    UserCredential userCredential =
+                                        await FirebaseAuth.instance
+                                            .createUserWithEmailAndPassword(
+                                      email: email.text,
+                                      password: password.text,
+                                    )
+                                            .then((_) {
+                                      addUser(email.text + 'doc1');
+
+                                      Navigator.of(context)
+                                          .pushNamedAndRemoveUntil('/login',
+                                              (Route<dynamic> route) => false);
+                                      return null;
+                                    });
+                                  } on FirebaseAuthException catch (e) {
+                                    if (e.code == 'weak-password') {
+                                      print(
+                                          'The password provided is too weak.');
+                                    } else if (e.code ==
+                                        'email-already-in-use') {
+                                      setState(() {
+                                        warning =
+                                            'Email account already exists. Try another email.';
+                                      });
+
+                                      print(
+                                          'The account already exists for that email.');
+                                    }
+                                  }
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: ListTile(
+                                    title: Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: 25.0,
+                                        ),
+                                        child: Text(
+                                          'Sign Up',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                    trailing: Icon(
+                                      Icons.arrow_forward,
+                                      size: 25,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                color: Theme.of(context).primaryColor,
+                              ),
                             )
                           ],
                         ),
@@ -266,6 +291,6 @@ class _signupState extends State<signup> {
                 ),
               ),
             ),
-        );
+          );
   }
 }

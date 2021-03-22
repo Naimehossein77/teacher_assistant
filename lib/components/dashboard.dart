@@ -1,23 +1,27 @@
-import 'package:anim_search_bar/anim_search_bar.dart';
+import 'package:bouncing_widget/bouncing_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:sample/SamsungGalaxyS105.dart';
 import 'package:sample/components/allclass.dart';
 import 'package:sample/components/dashboardPages/Presentpage.dart';
+import 'package:sample/components/test.dart';
 import 'package:tab_indicator_styler/tab_indicator_styler.dart';
 import 'main_drawer.dart';
 
 class dashboard extends StatefulWidget {
   @override
-  String appBarTitle = '', section;
-  dashboard({Key key, this.appBarTitle, this.section}) : super(key: key);
+  final String appBarTitle, section, uuid, first_roll;
+  dashboard(
+      {Key key, this.appBarTitle, this.section, this.uuid, this.first_roll})
+      : super(key: key);
   _dashboardState createState() => _dashboardState();
 }
 
 class _dashboardState extends State<dashboard> {
   final textController = TextEditingController();
   static List studentList = [],
+      presentList = ['1', '1', '1', '1', '1'],
       result = [],
       colorList = [
         '#6B1A99',
@@ -35,6 +39,22 @@ class _dashboardState extends State<dashboard> {
         '#8D53AE',
         '#8F56AF',
         '#925BB1'
+      ],
+      cycleList = [
+        'Cycle-1',
+        'Cycle-2',
+        'Cycle-3',
+        'Cycle-4',
+        'Cycle-5',
+        'Cycle-6',
+        'Cycle-7',
+        'Cycle-8',
+        'Cycle-9',
+        'Cycle-10',
+        'Cycle-11',
+        'Cycle-12',
+        'Cycle-13',
+        'Extra class'
       ];
   bool search = false;
 
@@ -44,21 +64,36 @@ class _dashboardState extends State<dashboard> {
     super.initState();
   }
 
-  void makeStudentList() {
-    int i = 0;
+  makeStudentList() async {
+    print('make studentList called');
+    int i = int.parse(widget.first_roll);
+    int roll = i;
+    dynamic gotresult = await getPresentSheet(roll, widget.uuid);
+    if (gotresult == null)
+      print('failed to load presentList');
+    else {
+      print('got presentList');
+      setState(() {
+        presentList = gotresult;
+      });
+    }
+
+    print(widget.first_roll);
+    print(i);
+    print(widget.section);
     studentList.clear();
-    if (widget.section == 'A')
-      i = 1803001;
-    else if (widget.section == 'B')
-      i = 1803061;
-    else
-      i = 1803121;
     for (int j = 0; j < 60; j++) {
       studentList.add(i.toString());
       i++;
     }
+
+    print(studentList);
+
     result = studentList;
   }
+
+  String choosenCycle = 'Cycle-1';
+  int cycle = 0;
 
   void filter(String value) {
     setState(() {
@@ -109,9 +144,60 @@ class _dashboardState extends State<dashboard> {
             actions: [
               search
                   ? Text('')
-                  : IconButton(
-                      icon: Icon(Icons.list_alt),
-                      onPressed: () {},
+                  : DropdownButton(
+                      items: cycleList.map((valueItem) {
+                        return DropdownMenuItem(
+                          value: valueItem,
+                          child: Text(valueItem),
+                        );
+                      }).toList(),
+                      value: choosenCycle,
+                      onChanged: (newValue) {
+                        setState(() {
+                          choosenCycle = newValue;
+                          if (choosenCycle == cycleList[0])
+                            cycle = 0;
+                          else if (choosenCycle == cycleList[1])
+                            cycle = 1;
+                          else if (choosenCycle == cycleList[2])
+                            cycle = 2;
+                          else if (choosenCycle == cycleList[3])
+                            cycle = 3;
+                          else if (choosenCycle == cycleList[4])
+                            cycle = 4;
+                          else if (choosenCycle == cycleList[5])
+                            cycle = 5;
+                          else if (choosenCycle == cycleList[6])
+                            cycle = 6;
+                          else if (choosenCycle == cycleList[7])
+                            cycle = 7;
+                          else if (choosenCycle == cycleList[8])
+                            cycle = 8;
+                          else if (choosenCycle == cycleList[9])
+                            cycle = 9;
+                          else if (choosenCycle == cycleList[10])
+                            cycle = 10;
+                          else if (choosenCycle == cycleList[11])
+                            cycle = 11;
+                          else if (choosenCycle == cycleList[12])
+                            cycle = 12;
+                          else if (choosenCycle == cycleList[13]) cycle = 13;
+                        });
+                      },
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14),
+                      dropdownColor: Colors.grey[700],
+                      icon: Icon(Icons.arrow_drop_down),
+                      iconSize: 25,
+                      iconDisabledColor: Colors.white,
+                      iconEnabledColor: Colors.white,
+                      hint: Text(
+                        'Cycle-1',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.w600),
+                      ),
                     ),
               search
                   ? IconButton(
@@ -370,6 +456,9 @@ class _dashboardState extends State<dashboard> {
                                 index: index,
                                 colorRollIndex:
                                     colorList[((index % 30) / 2).toInt()],
+                                presentList: presentList[index],
+                                uuid: widget.uuid,
+                                cycle: cycle,
                               );
                             },
                           ))
@@ -426,7 +515,7 @@ class _dashboardState extends State<dashboard> {
                               width: mwidth * .14,
                               child: Center(
                                 child: Text(
-                                  'CT#1',
+                                  'CT-1',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 18,
@@ -470,7 +559,7 @@ class _dashboardState extends State<dashboard> {
                               height: mheight * .05,
                               child: Center(
                                 child: Text(
-                                  'CT#2',
+                                  'CT-2',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 18,
@@ -497,7 +586,7 @@ class _dashboardState extends State<dashboard> {
                                       ))),
                               child: Center(
                                 child: Text(
-                                  'CT#3',
+                                  'CT-3',
                                   style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -523,7 +612,7 @@ class _dashboardState extends State<dashboard> {
                                       ))),
                               child: Center(
                                 child: Text(
-                                  'CT#4',
+                                  'CT-4',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 18,
@@ -598,9 +687,18 @@ class _dashboardState extends State<dashboard> {
 // EACH ROW CLASS==========================================================================================================================================================================
 class EachRowofListView extends StatefulWidget {
   EachRowofListView(
-      {Key key, this.studentRoll, this.index, this.colorRollIndex})
+      {Key key,
+      this.studentRoll,
+      this.index,
+      this.colorRollIndex,
+      this.presentList,
+      this.uuid,
+      this.cycle})
       : super(key: key);
-  String studentRoll, colorRollIndex;
+  String studentRoll, colorRollIndex, uuid;
+  final int cycle;
+  List presentList;
+
   int index;
   @override
   _EachRowofListViewState createState() => _EachRowofListViewState();
@@ -614,7 +712,7 @@ class _EachRowofListViewState extends State<EachRowofListView> {
     final evenColor = '#E4D5ED', oddColor = '#ffffff';
     return Container(
       alignment: Alignment.topLeft,
-      color: Colors.blue,
+      color: Colors.white,
       width: mwidth * .80,
       child: Row(
         children: [
@@ -631,17 +729,44 @@ class _EachRowofListViewState extends State<EachRowofListView> {
               ),
             ),
             decoration: BoxDecoration(
-                color: HexColor(widget.colorRollIndex),
+                color: HexColor('#7C37A4'),
                 border: Border.all(width: 0, color: HexColor("#FFFFFF"))),
           ),
+
+// AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
           Container(
             height: mheight * .05,
             width: mwidth * .14,
             child: Center(
-              child: Text(
-                'A',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, color: HexColor('#000000')),
+              child: BouncingWidget(
+                onPressed: () {
+                  setState(() {
+                    if (widget.presentList[widget.cycle * 5 + 0] == '1')
+                      widget.presentList[widget.cycle * 5 + 0] = '0';
+                    else
+                      widget.presentList[widget.cycle * 5 + 0] = '1';
+                    print(widget.index);
+                  });
+                  updatePresent(
+                      widget.studentRoll, widget.uuid, widget.presentList);
+                },
+                duration: Duration(milliseconds: 200),
+                scaleFactor: 1.8,
+                child: widget.presentList[widget.cycle * 5 + 0] == '0'
+                    ? Text(
+                        'A',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.red,
+                        ),
+                      )
+                    : Text(
+                        'P',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                        ),
+                      ),
               ),
             ),
             decoration: BoxDecoration(
@@ -655,10 +780,35 @@ class _EachRowofListViewState extends State<EachRowofListView> {
                 border: Border.all(width: 0, color: HexColor("#610A93"))),
             height: mheight * .05,
             child: Center(
-              child: Text(
-                'B',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, color: HexColor('#000000')),
+              child: BouncingWidget(
+                onPressed: () {
+                  setState(() {
+                    if (widget.presentList[widget.cycle * 5 + 1] == '1')
+                      widget.presentList[widget.cycle * 5 + 1] = '0';
+                    else
+                      widget.presentList[widget.cycle * 5 + 1] = '1';
+                    print(widget.index);
+                  });
+                  updatePresent(
+                      widget.studentRoll, widget.uuid, widget.presentList);
+                },
+                duration: Duration(milliseconds: 200),
+                scaleFactor: 1.8,
+                child: widget.presentList[widget.cycle * 5 + 1] == '0'
+                    ? Text(
+                        'A',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.red,
+                        ),
+                      )
+                    : Text(
+                        'P',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -669,9 +819,35 @@ class _EachRowofListViewState extends State<EachRowofListView> {
                 color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
                 border: Border.all(width: 0, color: HexColor("#610A93"))),
             child: Center(
-              child: Text(
-                'C',
-                style: TextStyle(fontSize: 18, color: HexColor('#000000')),
+              child: BouncingWidget(
+                onPressed: () {
+                  setState(() {
+                    if (widget.presentList[widget.cycle * 5 + 2] == '1')
+                      widget.presentList[widget.cycle * 5 + 2] = '0';
+                    else
+                      widget.presentList[widget.cycle * 5 + 2] = '1';
+                    print(widget.index);
+                  });
+                  updatePresent(
+                      widget.studentRoll, widget.uuid, widget.presentList);
+                },
+                duration: Duration(milliseconds: 200),
+                scaleFactor: 1.8,
+                child: widget.presentList[widget.cycle * 5 + 2] == '0'
+                    ? Text(
+                        'A',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.red,
+                        ),
+                      )
+                    : Text(
+                        'P',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -682,10 +858,35 @@ class _EachRowofListViewState extends State<EachRowofListView> {
                 color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
                 border: Border.all(width: 0, color: HexColor("#610A93"))),
             child: Center(
-              child: Text(
-                'D',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, color: HexColor('#000000')),
+              child: BouncingWidget(
+                onPressed: () {
+                  setState(() {
+                    if (widget.presentList[widget.cycle * 5 + 3] == '1')
+                      widget.presentList[widget.cycle * 5 + 3] = '0';
+                    else
+                      widget.presentList[widget.cycle * 5 + 3] = '1';
+                    print(widget.index);
+                  });
+                  updatePresent(
+                      widget.studentRoll, widget.uuid, widget.presentList);
+                },
+                duration: Duration(milliseconds: 200),
+                scaleFactor: 1.8,
+                child: widget.presentList[widget.cycle * 5 + 3] == '0'
+                    ? Text(
+                        'A',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.red,
+                        ),
+                      )
+                    : Text(
+                        'P',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -696,9 +897,35 @@ class _EachRowofListViewState extends State<EachRowofListView> {
                 color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
                 border: Border.all(width: 0, color: HexColor("#610A93"))),
             child: Center(
-              child: Text(
-                'E',
-                style: TextStyle(fontSize: 18, color: HexColor('#000000')),
+              child: BouncingWidget(
+                onPressed: () {
+                  setState(() {
+                    if (widget.presentList[widget.cycle * 5 + 4] == '1')
+                      widget.presentList[widget.cycle * 5 + 4] = '0';
+                    else
+                      widget.presentList[widget.cycle * 5 + 4] = '1';
+                    print(widget.index);
+                  });
+                  updatePresent(
+                      widget.studentRoll, widget.uuid, widget.presentList);
+                },
+                duration: Duration(milliseconds: 200),
+                scaleFactor: 1.8,
+                child: widget.presentList[widget.cycle * 5 + 4] == '0'
+                    ? Text(
+                        'A',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.red,
+                        ),
+                      )
+                    : Text(
+                        'P',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -719,14 +946,22 @@ class CtMarksList extends StatefulWidget {
 
 // ==============================================================================================================================================================
 class _CtMarksListState extends State<CtMarksList> {
+  bool open1 = false,
+      open2 = false,
+      open3 = false,
+      open4 = false,
+      open5 = false;
   @override
+  bool textFieldOpener = false;
   Widget build(BuildContext context) {
     final mheight = MediaQuery.of(context).size.height;
     final mwidth = MediaQuery.of(context).size.width;
     final evenColor = '#E4D5ED', oddColor = '#ffffff';
+    FocusScopeNode currentFocus = FocusScope.of(context);
+
     return Container(
       alignment: Alignment.topLeft,
-      color: Colors.blue,
+      color: Colors.white,
       width: mwidth * .80,
       child: Row(
         children: [
@@ -743,8 +978,50 @@ class _CtMarksListState extends State<CtMarksList> {
               ),
             ),
             decoration: BoxDecoration(
-                color: HexColor(widget.colorRollIndex),
+                color: HexColor('#7C37A4'),
                 border: Border.all(width: 0, color: HexColor("#FFFFFF"))),
+          ),
+          Container(
+            height: mheight * .05,
+            width: mwidth * .14,
+            child: Center(
+              child: open1
+                  ? Focus(
+                      child: TextField(
+                        autofocus: true,
+                        keyboardType: TextInputType.number,
+                      ),
+                      onFocusChange: (hasFocus) {
+                        if (!hasFocus)
+                          setState(() {
+                            open1 = !open1;
+                          });
+                      },
+                    )
+                  : GestureDetector(
+                      onTap: () {
+                        if (!currentFocus.hasPrimaryFocus)
+                          currentFocus.unfocus();
+                        setState(() {
+                          open1 = !open1;
+                          open2 = false;
+                          open3 = false;
+                          open4 = false;
+                        });
+                      },
+                      child: Text(
+                        '17',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: HexColor('#000000'),
+                        ),
+                      ),
+                    ),
+            ),
+            decoration: BoxDecoration(
+                color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
+                border: Border.all(width: 0, color: HexColor('#610A93'))),
           ),
           Container(
             height: mheight * .05,
@@ -752,13 +1029,35 @@ class _CtMarksListState extends State<CtMarksList> {
             child: Center(
               child: GestureDetector(
                 onTap: () {
-                  print('tapped');
+                  if (!currentFocus.hasPrimaryFocus) currentFocus.unfocus();
+                  setState(() {
+                    open2 = !open2;
+                    open1 = false;
+                    open3 = false;
+                    open4 = false;
+                  });
                 },
-                child: Text(
-                  'A',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 18, color: HexColor('#000000')),
-                ),
+                child: open2
+                    ? Focus(
+                        child: TextField(
+                          autofocus: true,
+                          keyboardType: TextInputType.number,
+                        ),
+                        onFocusChange: (hasFocus) {
+                          if (!hasFocus)
+                            setState(() {
+                              open2 = !open2;
+                            });
+                        },
+                      )
+                    : Text(
+                        '18',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: HexColor('#000000'),
+                        ),
+                      ),
               ),
             ),
             decoration: BoxDecoration(
@@ -766,59 +1065,159 @@ class _CtMarksListState extends State<CtMarksList> {
                 border: Border.all(width: 0, color: HexColor('#610A93'))),
           ),
           Container(
+            height: mheight * .05,
             width: mwidth * .14,
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  if (!currentFocus.hasPrimaryFocus) currentFocus.unfocus();
+                  setState(() {
+                    open3 = !open3;
+                    open1 = false;
+                    open2 = false;
+                    open4 = false;
+                  });
+                },
+                child: open3
+                    ? Focus(
+                        child: TextField(
+                          autofocus: true,
+                          keyboardType: TextInputType.number,
+                        ),
+                        onFocusChange: (hasFocus) {
+                          if (!hasFocus)
+                            setState(() {
+                              open3 = !open3;
+                            });
+                        },
+                      )
+                    : Text(
+                        '19',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: HexColor('#000000'),
+                        ),
+                      ),
+              ),
+            ),
             decoration: BoxDecoration(
                 color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
-                border: Border.all(width: 0, color: HexColor("#610A93"))),
+                border: Border.all(width: 0, color: HexColor('#610A93'))),
+          ),
+          Container(
             height: mheight * .05,
+            width: mwidth * .14,
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  if (!currentFocus.hasPrimaryFocus) currentFocus.unfocus();
+                  setState(() {
+                    open4 = !open4;
+                    open1 = false;
+                    open2 = false;
+                    open3 = false;
+                  });
+                },
+                child: open4
+                    ? Focus(
+                        child: TextField(
+                          autofocus: true,
+                          keyboardType: TextInputType.number,
+                        ),
+                        onFocusChange: (hasFocus) {
+                          if (!hasFocus)
+                            setState(() {
+                              open4 = !open4;
+                            });
+                        },
+                      )
+                    : Text(
+                        '20',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: HexColor('#000000'),
+                        ),
+                      ),
+              ),
+            ),
+            decoration: BoxDecoration(
+                color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
+                border: Border.all(width: 0, color: HexColor('#610A93'))),
+          ),
+          Container(
+            height: mheight * .05,
+            width: mwidth * .14,
             child: Center(
               child: Text(
-                'B',
+                '19',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, color: HexColor('#000000')),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: HexColor('#000000'),
+                ),
               ),
             ),
-          ),
-          Container(
-            height: mheight * .05,
-            width: mwidth * .14,
             decoration: BoxDecoration(
                 color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
-                border: Border.all(width: 0, color: HexColor("#610A93"))),
-            child: Center(
-              child: Text(
-                'C',
-                style: TextStyle(fontSize: 18, color: HexColor('#000000')),
-              ),
-            ),
+                border: Border.all(width: 0, color: HexColor('#610A93'))),
           ),
-          Container(
-            height: mheight * .05,
-            width: mwidth * .14,
-            decoration: BoxDecoration(
-                color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
-                border: Border.all(width: 0, color: HexColor("#610A93"))),
-            child: Center(
-              child: Text(
-                'D',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, color: HexColor('#000000')),
-              ),
-            ),
-          ),
-          Container(
-            height: mheight * .05,
-            width: mwidth * .14,
-            decoration: BoxDecoration(
-                color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
-                border: Border.all(width: 0, color: HexColor("#610A93"))),
-            child: Center(
-              child: Text(
-                'E',
-                style: TextStyle(fontSize: 18, color: HexColor('#000000')),
-              ),
-            ),
-          ),
+
+          //   Container(
+          //     width: mwidth * .14,
+          //     decoration: BoxDecoration(
+          //         color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
+          //         border: Border.all(width: 0, color: HexColor("#610A93"))),
+          //     height: mheight * .05,
+          //     child: Center(
+          //       child: Text(
+          //         '17',
+          //         textAlign: TextAlign.center,
+          //         style: TextStyle(fontSize: 18, color: HexColor('#000000')),
+          //       ),
+          //     ),
+          //   ),
+          //   Container(
+          //     height: mheight * .05,
+          //     width: mwidth * .14,
+          //     decoration: BoxDecoration(
+          //         color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
+          //         border: Border.all(width: 0, color: HexColor("#610A93"))),
+          //     child: Center(
+          //       child: Text(
+          //         '18',
+          //         style: TextStyle(fontSize: 18, color: HexColor('#000000')),
+          //       ),
+          //     ),
+          //   ),
+          //   Container(
+          //     height: mheight * .05,
+          //     width: mwidth * .14,
+          //     decoration: BoxDecoration(
+          //         color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
+          //         border: Border.all(width: 0, color: HexColor("#610A93"))),
+          //     child: Center(
+          //       child: Text(
+          //         '20',
+          //         textAlign: TextAlign.center,
+          //         style: TextStyle(fontSize: 18, color: HexColor('#000000')),
+          //       ),
+          //     ),
+          //   ),
+          //   Container(
+          //     height: mheight * .05,
+          //     width: mwidth * .14,
+          //     decoration: BoxDecoration(
+          //         color: HexColor(widget.index % 2 == 0 ? evenColor : oddColor),
+          //         border: Border.all(width: 0, color: HexColor("#610A93"))),
+          //     child: Center(
+          //       child: Text(
+          //         '18',
+          //         style: TextStyle(fontSize: 18, color: HexColor('#000000')),
+          //       ),
+          //     ),
+          //   ),
         ],
       ),
     );

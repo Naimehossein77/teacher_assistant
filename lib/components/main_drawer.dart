@@ -74,7 +74,7 @@ class _MainDrawerState extends State<MainDrawer> {
                 ),
               ),
             ),
-            decoration: new BoxDecoration(color: HexColor("#1F5ECF")),
+            decoration: new BoxDecoration(color: HexColor("#610A93")),
           ),
           InkWell(
             child: ListTile(

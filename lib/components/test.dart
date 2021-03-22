@@ -10,10 +10,19 @@ class listitem {
   String dept = '',
       section = '',
       series = '',
-      subject = '',
+      course = '',
+      course_code = '',
       search = '',
-      uuid = '';
-  listitem({this.dept, this.series, this.section, this.subject, this.uuid});
+      uuid = '',
+      first_roll = '';
+  listitem(
+      {this.dept,
+      this.series,
+      this.section,
+      this.course,
+      this.course_code,
+      this.uuid,
+      this.first_roll});
 }
 
 class Model {
@@ -39,12 +48,10 @@ class Model {
           print(element);
         });
       });
-      print('come here');
     } catch (e) {
       print(e.toString());
       return null;
     }
-    print(classroomcode.length);
     try {
       for (int i = 0; i < classroomcode.length; i++) {
         print('classroom loop executed');
@@ -54,16 +61,18 @@ class Model {
             .get()
             .then((result) {
           print('getting all List');
-              boxlist.add(listitem(
-              dept: result.data()['dept'],
-              series: result.data()['series'],
-              section: result.data()['section'],
-              subject: result.data()['subject'],
-              uuid: result.data()['uuid']));
-        
-          });
-          print(boxlist.length);
-          
+          boxlist.add(listitem(
+            dept: result.data()['dept'],
+            series: result.data()['series'],
+            section: result.data()['section'],
+            course: result.data()['course'],
+            course_code: result.data()['course_code'],
+            uuid: result.data()['uuid'],
+            first_roll: result.data()['first_roll'],
+          ));
+          print(result.data()['first_roll']);
+        });
+        print(boxlist.length);
       }
 
       return boxlist;
@@ -86,8 +95,8 @@ class Model {
   }
 
 // ADD CLASSROOM TO CLASSES===================================================================================================================
-  void add_classroom_to_classes(
-      String dept, String series, String section, String subject, String uuid) {
+  void add_classroom_to_classes(String dept, String series, String section,
+      String course, String course_code, String uuid, int firstRoll) {
     FirebaseFirestore.instance
         .collection('classes')
         .doc(uuid)
@@ -95,7 +104,11 @@ class Model {
           'dept': dept,
           'series': series, // John Doe
           'section': section,
-          'subject': subject,
+          'course': course,
+          'course_code': course_code,
+          'first_roll': firstRoll.toString(),
+          'uuid': uuid,
+
           // Stokes and Sons
         }, SetOptions(merge: true))
         .then(
@@ -103,9 +116,7 @@ class Model {
         .catchError(
             (error) => print("Failed to add user: User already available"));
 
-    FirebaseFirestore.instance.collection('classes').doc('classList').set({
-      'classroom': FieldValue.arrayUnion([dept + series + section + subject]),
-    });
+    for (int i = 0; i < 60; i++) createPresentSheet(firstRoll + i, uuid);
   }
 
 // ADD CLASSROOM TO ID===========================================================================================================
@@ -226,5 +237,86 @@ String convertToTitleCase(String text) {
 extension CapitalizedStringExtension on String {
   String toTitleCase() {
     return convertToTitleCase(this);
+  }
+}
+
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+void updatePresent(String roll, String uuid, List presentList) {
+  String present = '';
+  for (int i = 0; i < presentList.length; i++) {
+    present += presentList[i].toString();
+  }
+  print('present' + present);
+  FirebaseFirestore.instance
+      .collection('classes')
+      .doc(uuid)
+      .collection('present')
+      .doc('presentdoc')
+      .set({
+        roll: present,
+      }, SetOptions(merge: true))
+      .then((value) => print("Updated the roll present"))
+      .catchError((error) => print("failed to update roll present"));
+}
+
+void createPresentSheet(int roll, String uuid) async {
+  String present = '', ctMarks = '';
+  for (int i = 0; i < 70; i++) {
+    present += '1';
+  }
+  ctMarks = '00000000';
+  print(present);
+  FirebaseFirestore.instance
+      .collection('classes')
+      .doc(uuid)
+      .collection('present')
+      .doc('presentdoc')
+      .set({
+        roll.toString(): present,
+      }, SetOptions(merge: true))
+      .then((value) => print("Updated the roll present"))
+      .catchError((error) => print("failed to update roll present"));
+  FirebaseFirestore.instance
+      .collection('classes')
+      .doc(uuid)
+      .collection('ctmarks')
+      .doc('ctmarksdoc')
+      .set({
+        roll.toString(): ctMarks,
+      }, SetOptions(merge: true))
+      .then((value) => print("Updated the roll present"))
+      .catchError((error) => print("failed to update roll present"));
+}
+
+Future getPresentSheet(int roll, String uuid) async {
+  print(uuid);
+  List boxlist = List.generate(
+    60,
+    (i) => new List(),
+  );
+  String temp = '';
+  try {
+    await FirebaseFirestore.instance
+        .collection('classes')
+        .doc(uuid)
+        .collection('present')
+        .doc('presentdoc')
+        .get()
+        .then((result) {
+      for (int i = 0; i < 60; i++, roll++) {
+        // print(result.data()[roll.toString()]);
+        temp = result.data()[roll.toString()];
+        // print(temp.length);
+        for (int k = 0; k < 70; k++) {
+          boxlist[i].add(temp[k].toString());
+        }
+        // boxlist.add(result.data()[roll.toString()]);
+        // print(boxlist[i].length);
+
+      }
+    });
+    return boxlist;
+  } catch (e) {
+    print(e.toString());
   }
 }

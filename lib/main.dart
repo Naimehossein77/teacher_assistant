@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -15,6 +14,7 @@ import 'package:sample/components/login.dart';
 import 'package:sample/components/signup.dart';
 import 'package:sample/components/test.dart';
 import 'components/main_drawer.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 //FIREBASE IMPORTS
 import 'package:firebase_auth/firebase_auth.dart';
@@ -52,7 +52,7 @@ class _HomepageState extends State<Homepage> {
           accentColor: HexColor("#8346A7"),
 
           // Define the default font family.
-          fontFamily: 'Rockwell',
+          textTheme: GoogleFonts.robotoTextTheme(Theme.of(context).textTheme),
         ),
         debugShowCheckedModeBanner: false,
         home: root(),
@@ -115,10 +115,10 @@ class _LoadingState extends State<Loading> {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        color: Colors.white60,
+        color: Colors.white70,
         child: Center(
           child: SpinKitThreeBounce(
-            color: Colors.pink[100],
+            color: HexColor('#8C3FB8'),
             size: 30,
           ),
         ),
@@ -148,59 +148,3 @@ void check() async {
     print('not connected');
   }
 }
-
-// class HomePage extends StatelessWidget {
-//   const HomePage({Key key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Theme.of(context).primaryColor,
-//       appBar: AppBar(
-//         leading: IconButton(
-//           icon: Icon(Icons.menu),
-//           iconSize: 30.0,
-//           color: Colors.white,
-//           onPressed: () {},
-//         ),
-//         title: Text(
-//           'ChatsUp',
-//           style: TextStyle(
-//             fontSize: 28.0,
-//             fontWeight: FontWeight.bold,
-//           ),
-//         ),
-//         elevation: 0.0,
-//         actions: [
-//           IconButton(
-//             icon: Icon(Icons.search),
-//             iconSize: 30.0,
-//             color: Colors.white,
-//             onPressed: () {},
-//           ),
-//         ],
-//       ),
-//       body: Column(
-//         children: [
-//           CategorySelector(),
-//           Expanded(
-//             child: Container(
-//               decoration: BoxDecoration(
-//                 color: Theme.of(context).accentColor,
-//                 borderRadius: BorderRadius.only(
-//                   topLeft: Radius.circular(30.0),
-//                   topRight: Radius.circular(30.0),
-//                 ),
-//               ),
-//               child: Column(
-//                 children: [
-//                   favoriteContacts(),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }

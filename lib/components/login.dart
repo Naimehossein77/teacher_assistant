@@ -55,15 +55,16 @@ class _loginState extends State<login> {
     return (loader)
         ? Loading()
         : GestureDetector(
-          onTap: (){if (!currentFocus.hasPrimaryFocus) currentFocus.unfocus();},
-          child: Scaffold(
+            onTap: () {
+              if (!currentFocus.hasPrimaryFocus) currentFocus.unfocus();
+            },
+            child: Scaffold(
               appBar: AppBar(
                 title: Text(
-                  'Welcome to Your Assistant\' Sir!',
+                  'Teachers Portal',
                   style: TextStyle(fontSize: 16),
                 ),
                 leading: Icon(Icons.ac_unit),
-                backgroundColor: Colors.pink,
               ),
               body: Container(
                 color: Colors.white,
@@ -82,7 +83,8 @@ class _loginState extends State<login> {
                               children: [
                                 cn,
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(0, 15, 0, 0),
                                   child: Container(
                                     child: TextFormField(
                                       controller: email,
@@ -92,8 +94,8 @@ class _loginState extends State<login> {
                                         border: OutlineInputBorder(),
                                         filled: true,
                                         prefixIcon: Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 3.0),
+                                          padding: const EdgeInsets.only(
+                                              bottom: 3.0),
                                           child: Icon(
                                             Icons.email,
                                             size: 19,
@@ -110,7 +112,8 @@ class _loginState extends State<login> {
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(0, 15, 0, 0),
                                   child: TextFormField(
                                     controller: password,
                                     decoration: InputDecoration(
@@ -120,7 +123,8 @@ class _loginState extends State<login> {
                                       filled: true,
                                       fillColor: Colors.grey[200],
                                       prefixIcon: Padding(
-                                        padding: const EdgeInsets.only(bottom: 3.0),
+                                        padding:
+                                            const EdgeInsets.only(bottom: 3.0),
                                         child: Icon(
                                           FontAwesomeIcons.unlock,
                                           size: 17,
@@ -128,7 +132,8 @@ class _loginState extends State<login> {
                                       ),
                                     ),
                                     validator: (String value) {
-                                      if (value.isEmpty) return 'Enter Password';
+                                      if (value.isEmpty)
+                                        return 'Enter Password';
                                       return null;
                                     },
                                     keyboardType: TextInputType.name,
@@ -136,7 +141,8 @@ class _loginState extends State<login> {
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(12, 5, 0, 0),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(12, 5, 0, 0),
                                   child: Text(
                                     errormessage,
                                     style: TextStyle(
@@ -167,12 +173,15 @@ class _loginState extends State<login> {
                                           loader = true;
                                         });
                                         Navigator.pop(context);
-                                        Navigator.of(context).push(PageTransition(
-                                            type: PageTransitionType.rightToLeft,
-                                            child: allclass()));
+                                        Navigator.of(context).push(
+                                            PageTransition(
+                                                type: PageTransitionType
+                                                    .rightToLeft,
+                                                child: allclass()));
                                       } on FirebaseAuthException catch (e) {
                                         if (e.code == 'user-not-found') {
-                                          print('No user found for that email.');
+                                          print(
+                                              'No user found for that email.');
                                         } else if (e.code == 'wrong-password') {
                                           print(
                                               'Wrong password provided for that user.');
@@ -199,7 +208,8 @@ class _loginState extends State<login> {
                                   child: ListTile(
                                     title: Center(
                                       child: Padding(
-                                        padding: const EdgeInsets.only(left: 25.0),
+                                        padding:
+                                            const EdgeInsets.only(left: 25.0),
                                         child: Text(
                                           'Login',
                                           style: TextStyle(color: Colors.white),
@@ -212,7 +222,7 @@ class _loginState extends State<login> {
                                       color: Colors.white,
                                     ),
                                   ),
-                                  color: Colors.pink,
+                                  color: Theme.of(context).primaryColor,
                                 ),
                                 SizedBox(
                                   height: 15,
@@ -239,10 +249,12 @@ class _loginState extends State<login> {
                                 ),
                                 RaisedButton(
                                   onPressed: () async {
-                                    await Auth().signInGoogle().whenComplete(() {
-                                      Navigator.of(context).pushNamedAndRemoveUntil(
-                                          '/allclass',
-                                          (Route<dynamic> route) => false);
+                                    await Auth()
+                                        .signInGoogle()
+                                        .whenComplete(() {
+                                      Navigator.of(context)
+                                          .pushNamedAndRemoveUntil('/allclass',
+                                              (Route<dynamic> route) => false);
                                     });
                                   },
                                   child: Text('SingIn with Google'),
@@ -257,7 +269,7 @@ class _loginState extends State<login> {
                 ),
               ),
             ),
-        );
+          );
   }
 }
 
