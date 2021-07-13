@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:bouncing_widget/bouncing_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,23 +10,27 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bounce/flutter_bounce.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
 import 'package:sample/components/dashboard.dart';
 import 'package:sample/components/main_drawer.dart';
+import 'package:sample/components/qrcodescanner.dart';
 import 'package:sample/components/test.dart';
 import 'package:sample/main.dart';
 import 'package:validators/validators.dart';
 import 'login.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:validators/validators.dart';
-
 import 'test.dart';
 import 'package:uuid/uuid.dart';
 
 // ALLCLASS WIDGET
+
 class allclass extends StatefulWidget {
-  bool this_is_first_login = false;
-  allclass({Key key, this.this_is_first_login}) : super(key: key);
+  allclass({
+    Key key,
+  }) : super(key: key);
   @override
   _allclassState createState() => _allclassState();
 }
@@ -39,6 +45,7 @@ class _allclassState extends State<allclass> {
   final course_code = TextEditingController();
   final course = TextEditingController();
   final first_roll = TextEditingController();
+  final classRoom_code = TextEditingController();
   Function validator;
   GlobalKey<RefreshIndicatorState> refreshKey;
   bool search = false;
@@ -54,8 +61,15 @@ class _allclassState extends State<allclass> {
       ],
       result = [];
   static int cnt = 0;
-  String mdept = '', mseries = '', msection = '', msubject = '';
+  String mdept = '', mseries = '', msection = '', msubject = '', _string;
   CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+  void updateQRCode(String code) {
+    Model().add_class_to_id(code);
+    print('qr code added to id');
+    refreshList();
+  }
+
   @override
   void initState() {
     print('initState of allclass');
@@ -98,9 +112,11 @@ class _allclassState extends State<allclass> {
   // BUILDCONTEXT STARTS
   @override
   Widget build(BuildContext context) {
+    check(context);
     final mheight = MediaQuery.of(context).size.height;
     final mwidth = MediaQuery.of(context).size.width;
     User user = FirebaseAuth.instance.currentUser;
+
     FocusScopeNode currentFocus = FocusScope.of(context);
 
     return Scaffold(
@@ -136,6 +152,7 @@ class _allclassState extends State<allclass> {
                   onPressed: () {
                     setState(() {
                       search = !search;
+
                       boxlist = result;
                       src.text = '';
                     });
@@ -165,6 +182,7 @@ class _allclassState extends State<allclass> {
             course.text = '';
             course_code.text = '';
             first_roll.text = '';
+            classRoom_code.text = '';
           });
           showDialog(
               context: context,
@@ -173,12 +191,108 @@ class _allclassState extends State<allclass> {
                   child: Form(
                     key: _formkey,
                     child: Padding(
-                      padding: const EdgeInsets.all(15.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Container(
-                        height: mheight * .90,
+                        height: mheight * .80,
                         width: mwidth * .95,
                         child: ListView(
                           children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.warning,
+                                    color: HexColor('#F7B217'),
+                                  ),
+                                  Text(
+                                    'Warning',
+                                    style: TextStyle(fontSize: 16),
+                                  )
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                  'If you have a class code then Enter the code and connect your classroom with your partner teacher!'),
+                            ),
+                            Container(
+                              height: mheight * .10,
+                              child: Padding(
+                                padding: const EdgeInsets.all(5.0),
+                                child: TextFormField(
+                                  controller: classRoom_code,
+                                  decoration: InputDecoration(
+                                    hintText: "ex: abcde7gh",
+                                    labelText: 'Classroom Code.',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.grey[50],
+                                  ),
+                                  validator: (String value) {
+                                    if (value.isEmpty || value.length != 8)
+                                      return 'Enter Correct Classroom Code';
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: ButtonTheme(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20)),
+                                height: mheight * .06,
+                                child: RaisedButton(
+                                  onPressed: () {
+                                    if (classRoom_code.text.length == 7) {
+                                      setState(() {
+                                        Model().add_class_to_id(
+                                            classRoom_code.text);
+                                      });
+                                      refreshList();
+
+                                      dept.text = '';
+                                      series.text = '';
+                                      section.text = '';
+                                      course_code.text = '';
+                                      course.text = '';
+                                      first_roll.text = '';
+                                      Navigator.pop(context);
+                                    }
+                                  },
+                                  child: Text(
+                                    'Join ClassRoom',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 16),
+                                  ),
+                                  color: HexColor('#F44236'),
+                                ),
+                              ),
+                            ),
+                            RaisedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => QRViewExample(
+                                              onSonChanged: updateQRCode,
+                                            )));
+                              },
+                              child: Text('Scan QR Code'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                  child: Text(
+                                'Or',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.grey[600]),
+                              )),
+                            ),
                             Container(
                               height: mheight * .10,
                               child: Padding(
@@ -188,7 +302,9 @@ class _allclassState extends State<allclass> {
                                   decoration: InputDecoration(
                                     hintText: "ex: CSE/EEE/ME",
                                     labelText: 'Enter Dept.',
-                                    border: OutlineInputBorder(),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
                                     filled: true,
                                     fillColor: Colors.grey[100],
                                   ),
@@ -208,7 +324,9 @@ class _allclassState extends State<allclass> {
                                   decoration: InputDecoration(
                                     hintText: "ex: 18/19/20",
                                     labelText: 'Enter Series',
-                                    border: OutlineInputBorder(),
+                                    border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
                                     filled: true,
                                     fillColor: Colors.grey[100],
                                   ),
@@ -229,7 +347,9 @@ class _allclassState extends State<allclass> {
                                   decoration: InputDecoration(
                                     hintText: "ex: A/B/C",
                                     labelText: 'Enter Section',
-                                    border: OutlineInputBorder(),
+                                    border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
                                     filled: true,
                                     fillColor: Colors.grey[100],
                                   ),
@@ -249,7 +369,9 @@ class _allclassState extends State<allclass> {
                                   decoration: InputDecoration(
                                     hintText: "ex: CSE/HUM/EEE",
                                     labelText: 'Enter Course',
-                                    border: OutlineInputBorder(),
+                                    border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
                                     filled: true,
                                     fillColor: Colors.grey[100],
                                   ),
@@ -269,7 +391,9 @@ class _allclassState extends State<allclass> {
                                   decoration: InputDecoration(
                                     hintText: "ex: 2201/2113",
                                     labelText: 'Enter Course Code',
-                                    border: OutlineInputBorder(),
+                                    border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
                                     filled: true,
                                     fillColor: Colors.grey[100],
                                   ),
@@ -291,14 +415,16 @@ class _allclassState extends State<allclass> {
                                   decoration: InputDecoration(
                                     hintText: "ex: 1803121/1803001/1803061",
                                     labelText: 'Enter Fist Roll',
-                                    border: OutlineInputBorder(),
+                                    border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
                                     filled: true,
                                     fillColor: Colors.grey[100],
                                   ),
                                   keyboardType: TextInputType.number,
                                   validator: (String value) {
-                                    if (value.isEmpty)
-                                      return 'Enter Course Code';
+                                    if (value.length != 7)
+                                      return 'Roll must have 7 length';
                                     return null;
                                   },
                                 ),
@@ -307,12 +433,13 @@ class _allclassState extends State<allclass> {
                             Padding(
                               padding: const EdgeInsets.all(5.0),
                               child: ButtonTheme(
-                                height: mheight * .08,
+                                height: mheight * .06,
                                 child: RaisedButton(
                                   onPressed: () {
+                                    classRoom_code.text = 'abcdefgh';
                                     if (_formkey.currentState.validate()) {
+                                      // Navigator.pop(context);
                                       Navigator.pop(context);
-
                                       String uuid = Uuid().v1().substring(0, 7);
                                       dept.text = dept.text.toUpperCase();
                                       section.text = section.text.toUpperCase();
@@ -357,8 +484,10 @@ class _allclassState extends State<allclass> {
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 16),
                                   ),
-                                  color: Theme.of(context).accentColor,
+                                  color: HexColor('#5CB85C'),
                                 ),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20)),
                               ),
                             )
                           ],
@@ -454,6 +583,18 @@ class BoxListState extends State<BoxList> {
   Widget build(BuildContext context) {
     final mheight = MediaQuery.of(context).size.height;
     final mwidth = MediaQuery.of(context).size.width;
+
+    void handleClick(String value) {
+      switch (value) {
+        case 'Delete':
+          print('Delete');
+          break;
+        case 'Share classroom code':
+          print('Share classroom code');
+          break;
+      }
+    }
+
     return Bounce(
       duration: Duration(milliseconds: 80),
       onPressed: () {
@@ -506,12 +647,26 @@ class BoxListState extends State<BoxList> {
                           ),
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.more_vert,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {},
+                      // IconButton(
+                      //   icon: Icon(
+                      //     Icons.more_vert,
+                      //     color: Colors.white,
+                      //   ),
+                      //   onPressed: () {},
+                      // ),
+                      PopupMenuButton<String>(
+                        onSelected: handleClick,
+                        itemBuilder: (BuildContext context) {
+                          return {
+                            'Delete',
+                            'Share classroom code',
+                          }.map((String choice) {
+                            return PopupMenuItem<String>(
+                              value: choice,
+                              child: Text(choice),
+                            );
+                          }).toList();
+                        },
                       ),
                     ],
                   ),

@@ -21,7 +21,7 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
-  provider: ^3.1.0
+  provider: ^5.0.0
   flutter:
     sdk: flutter
   carousel_pro: ^1.0.0
@@ -39,13 +39,19 @@ dependencies:
   page_transition: ^1.1.7+6
   bouncing_widget: ^1.2.3
   uuid:
-  adobe_xd: ^1.1.0+1
   hexcolor: 
   tab_indicator_styler: ^1.0.0
   shimmer: ^1.1.2
   google_fonts: 
   flutter_bounce:
-  
+  qr_code_scanner: ^0.3.5
+
+
+
+
+
+
+
   
 
 
@@ -56,7 +62,17 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_name: "^0.0.1"
+  flutter_launcher_icons: "^0.8.0"
+  
+flutter_launcher_name:
+  name: "Teachers Portal"
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
 
+  
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

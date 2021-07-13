@@ -293,22 +293,3 @@ class Loading extends StatelessWidget {
   }
 }
 
-Future<bool> check(context) async {
-  try {
-    final result = await InternetAddress.lookup('google.com');
-    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-      print('connected');
-      return true;
-    }
-  } on SocketException catch (_) {
-    print('not connected');
-    showTopSnackBar(
-      context,
-      CustomSnackBar.error(
-        message:
-            "Something went wrong. Please check your Internet connection and try again",
-      ),
-    );
-    return false;
-  }
-}

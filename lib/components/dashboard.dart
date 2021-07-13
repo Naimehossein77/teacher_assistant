@@ -2,7 +2,6 @@ import 'package:bouncing_widget/bouncing_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:sample/SamsungGalaxyS105.dart';
 import 'package:sample/components/allclass.dart';
 import 'package:sample/components/dashboardPages/Presentpage.dart';
 import 'package:sample/components/test.dart';
@@ -23,6 +22,8 @@ class _dashboardState extends State<dashboard> {
   static List studentList = [],
       presentList = ['1', '1', '1', '1', '1'],
       result = [],
+      presentResult = [],
+      ctMarksResult = ['0', '0', '0', '0', '0', '0', '0', '0'],
       colorList = [
         '#6B1A99',
         '#6F219C',
@@ -69,12 +70,14 @@ class _dashboardState extends State<dashboard> {
     int i = int.parse(widget.first_roll);
     int roll = i;
     dynamic gotresult = await getPresentSheet(roll, widget.uuid);
+    dynamic gotctresult = await getCtMarksSheet(roll, widget.uuid);
     if (gotresult == null)
       print('failed to load presentList');
     else {
       print('got presentList');
       setState(() {
-        presentList = gotresult;
+        presentList = presentResult = gotresult;
+        ctMarksResult = gotctresult;
       });
     }
 
@@ -95,17 +98,31 @@ class _dashboardState extends State<dashboard> {
   String choosenCycle = 'Cycle-1';
   int cycle = 0;
 
-  void filter(String value) {
-    setState(() {
-      if (value.isEmpty)
-        studentList = result;
-      else
-        studentList = result
-            .where((i) =>
-                i.toString() == value || i.toString().substring(4) == value)
-            .toList();
-    });
-  }
+  // void filter(String value) {
+  //   setState(() {
+  //     if (value.isEmpty) {
+  //       print('presentList is cleared');
+  //       print(presentResult);
+  //       studentList = result;
+  //       presentList = presentResult;
+  //     } else {
+  //       studentList = result
+  //           .where((i) =>
+  //               i.toString() == value || i.toString().substring(4) == value)
+  //           .toList();
+  //       if (studentList.length == 1) {
+  //         String temp = studentList[0];
+  //         print(temp);
+  //         temp = temp.substring(4);
+  //         int roll = int.parse(temp);
+
+  //         presentList[0] = presentResult[
+  //             roll == 60 || roll == 120 || roll == 180 ? 59 : roll % 60 - 1];
+  //       }
+  //     }
+  //   });
+  //   print(presentResult);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +143,7 @@ class _dashboardState extends State<dashboard> {
                 ? TextField(
                     controller: textController,
                     decoration: InputDecoration(
-                      hintText: 'Search',
+                      hintText: 'Search 063/1803063',
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30)),
                       fillColor: Colors.grey[100],
@@ -134,7 +151,7 @@ class _dashboardState extends State<dashboard> {
                     ),
                     autofocus: true,
                     onChanged: (value) {
-                      filter(value);
+                      // filter(value);
                     },
                   )
                 : Text(widget.appBarTitle),
@@ -144,88 +161,94 @@ class _dashboardState extends State<dashboard> {
             actions: [
               search
                   ? Text('')
-                  : DropdownButton(
-                      items: cycleList.map((valueItem) {
-                        return DropdownMenuItem(
-                          value: valueItem,
-                          child: Text(valueItem),
-                        );
-                      }).toList(),
-                      value: choosenCycle,
-                      onChanged: (newValue) {
-                        setState(() {
-                          choosenCycle = newValue;
-                          if (choosenCycle == cycleList[0])
-                            cycle = 0;
-                          else if (choosenCycle == cycleList[1])
-                            cycle = 1;
-                          else if (choosenCycle == cycleList[2])
-                            cycle = 2;
-                          else if (choosenCycle == cycleList[3])
-                            cycle = 3;
-                          else if (choosenCycle == cycleList[4])
-                            cycle = 4;
-                          else if (choosenCycle == cycleList[5])
-                            cycle = 5;
-                          else if (choosenCycle == cycleList[6])
-                            cycle = 6;
-                          else if (choosenCycle == cycleList[7])
-                            cycle = 7;
-                          else if (choosenCycle == cycleList[8])
-                            cycle = 8;
-                          else if (choosenCycle == cycleList[9])
-                            cycle = 9;
-                          else if (choosenCycle == cycleList[10])
-                            cycle = 10;
-                          else if (choosenCycle == cycleList[11])
-                            cycle = 11;
-                          else if (choosenCycle == cycleList[12])
-                            cycle = 12;
-                          else if (choosenCycle == cycleList[13]) cycle = 13;
-                        });
-                      },
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14),
-                      dropdownColor: Colors.grey[700],
-                      icon: Icon(Icons.arrow_drop_down),
-                      iconSize: 25,
-                      iconDisabledColor: Colors.white,
-                      iconEnabledColor: Colors.white,
-                      hint: Text(
-                        'Cycle-1',
+                  : Padding(
+                      padding: const EdgeInsets.only(right: 15.0),
+                      child: DropdownButton(
+                        items: cycleList.map((valueItem) {
+                          return DropdownMenuItem(
+                            value: valueItem,
+                            child: Text(
+                              valueItem,
+                            ),
+                          );
+                        }).toList(),
+                        value: choosenCycle,
+                        onChanged: (newValue) {
+                          setState(() {
+                            choosenCycle = newValue;
+                            if (choosenCycle == cycleList[0])
+                              cycle = 0;
+                            else if (choosenCycle == cycleList[1])
+                              cycle = 1;
+                            else if (choosenCycle == cycleList[2])
+                              cycle = 2;
+                            else if (choosenCycle == cycleList[3])
+                              cycle = 3;
+                            else if (choosenCycle == cycleList[4])
+                              cycle = 4;
+                            else if (choosenCycle == cycleList[5])
+                              cycle = 5;
+                            else if (choosenCycle == cycleList[6])
+                              cycle = 6;
+                            else if (choosenCycle == cycleList[7])
+                              cycle = 7;
+                            else if (choosenCycle == cycleList[8])
+                              cycle = 8;
+                            else if (choosenCycle == cycleList[9])
+                              cycle = 9;
+                            else if (choosenCycle == cycleList[10])
+                              cycle = 10;
+                            else if (choosenCycle == cycleList[11])
+                              cycle = 11;
+                            else if (choosenCycle == cycleList[12])
+                              cycle = 12;
+                            else if (choosenCycle == cycleList[13]) cycle = 13;
+                          });
+                        },
                         style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.w600),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15),
+                        dropdownColor: Colors.grey[700],
+                        icon: Icon(Icons.arrow_drop_down),
+                        iconSize: 30,
+                        iconDisabledColor: Colors.white,
+                        iconEnabledColor: Colors.white,
+                        hint: Text(
+                          'Cycle-1',
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.w600),
+                        ),
                       ),
                     ),
-              search
-                  ? IconButton(
-                      icon: Icon(
-                        Icons.cancel,
-                        color: Colors.white,
-                      ),
-                      iconSize: 18,
-                      onPressed: () {
-                        setState(() {
-                          search = !search;
-                          studentList = result;
-                          textController.text = '';
-                        });
-                      },
-                    )
-                  : IconButton(
-                      icon: Icon(
-                        FontAwesomeIcons.search,
-                        color: Colors.white,
-                      ),
-                      iconSize: 16,
-                      onPressed: () {
-                        setState(() {
-                          search = !search;
-                        });
-                      },
-                    )
+              // search
+              //     ? IconButton(
+              //         icon: Icon(
+              //           Icons.cancel,
+              //           color: Colors.white,
+              //         ),
+              //         iconSize: 18,
+              //         onPressed: () {
+              //           setState(() {
+              //             search = !search;
+              //             studentList = result;
+              //             presentList = presentResult;
+              //             textController.text = '';
+              //           });
+              //         },
+              //       )
+              //     : IconButton(
+              //         icon: Icon(
+              //           FontAwesomeIcons.search,
+              //           color: Colors.white,
+              //         ),
+              //         iconSize: 16,
+              //         onPressed: () {
+              //           setState(() {
+              //             search = !search;
+              //           });
+              //         },
+              //       )
             ],
             bottom: TabBar(
               indicatorColor: Colors.white,
@@ -452,14 +475,14 @@ class _dashboardState extends State<dashboard> {
                             itemCount: studentList.length,
                             itemBuilder: (BuildContext context, int index) {
                               return EachRowofListView(
-                                studentRoll: studentList[index],
-                                index: index,
-                                colorRollIndex:
-                                    colorList[((index % 30) / 2).toInt()],
-                                presentList: presentList[index],
-                                uuid: widget.uuid,
-                                cycle: cycle,
-                              );
+                                  studentRoll: studentList[index],
+                                  index: index,
+                                  colorRollIndex:
+                                      colorList[((index % 30) / 2).toInt()],
+                                  presentList: presentList[index],
+                                  uuid: widget.uuid,
+                                  cycle: cycle,
+                                  studentRollList: presentResult);
                             },
                           ))
                     ],
@@ -662,11 +685,12 @@ class _dashboardState extends State<dashboard> {
                             itemCount: studentList.length,
                             itemBuilder: (BuildContext context, int index) {
                               return CtMarksList(
-                                studentRoll: studentList[index],
-                                index: index,
-                                colorRollIndex:
-                                    colorList[((index % 30) ~/ 2).toInt()],
-                              );
+                                  studentRoll: studentList[index],
+                                  index: index,
+                                  colorRollIndex:
+                                      colorList[((index % 30) ~/ 2).toInt()],
+                                  ctMarks: ctMarksResult[index],
+                                  uuid: widget.uuid);
                             },
                           ))
                     ],
@@ -693,11 +717,12 @@ class EachRowofListView extends StatefulWidget {
       this.colorRollIndex,
       this.presentList,
       this.uuid,
-      this.cycle})
+      this.cycle,
+      this.studentRollList})
       : super(key: key);
   String studentRoll, colorRollIndex, uuid;
   final int cycle;
-  List presentList;
+  List presentList, studentRollList;
 
   int index;
   @override
@@ -705,6 +730,7 @@ class EachRowofListView extends StatefulWidget {
 }
 
 class _EachRowofListViewState extends State<EachRowofListView> {
+  dashboard car;
   @override
   Widget build(BuildContext context) {
     final mheight = MediaQuery.of(context).size.height;
@@ -749,6 +775,12 @@ class _EachRowofListViewState extends State<EachRowofListView> {
                   });
                   updatePresent(
                       widget.studentRoll, widget.uuid, widget.presentList);
+                  int roll = int.parse(widget.studentRoll.substring(4));
+
+                  widget.studentRollList[
+                      roll == 60 || roll == 120 || roll == 180
+                          ? 59
+                          : roll % 60 - 1] = widget.presentList;
                 },
                 duration: Duration(milliseconds: 200),
                 scaleFactor: 1.8,
@@ -791,6 +823,11 @@ class _EachRowofListViewState extends State<EachRowofListView> {
                   });
                   updatePresent(
                       widget.studentRoll, widget.uuid, widget.presentList);
+                  int roll = int.parse(widget.studentRoll.substring(4));
+                  widget.studentRollList[
+                      roll == 60 || roll == 120 || roll == 180
+                          ? 59
+                          : roll % 60 - 1] = widget.presentList;
                 },
                 duration: Duration(milliseconds: 200),
                 scaleFactor: 1.8,
@@ -830,6 +867,11 @@ class _EachRowofListViewState extends State<EachRowofListView> {
                   });
                   updatePresent(
                       widget.studentRoll, widget.uuid, widget.presentList);
+                  int roll = int.parse(widget.studentRoll.substring(4));
+                  widget.studentRollList[
+                      roll == 60 || roll == 120 || roll == 180
+                          ? 59
+                          : roll % 60 - 1] = widget.presentList;
                 },
                 duration: Duration(milliseconds: 200),
                 scaleFactor: 1.8,
@@ -869,6 +911,11 @@ class _EachRowofListViewState extends State<EachRowofListView> {
                   });
                   updatePresent(
                       widget.studentRoll, widget.uuid, widget.presentList);
+                  int roll = int.parse(widget.studentRoll.substring(4));
+                  widget.studentRollList[
+                      roll == 60 || roll == 120 || roll == 180
+                          ? 59
+                          : roll % 60 - 1] = widget.presentList;
                 },
                 duration: Duration(milliseconds: 200),
                 scaleFactor: 1.8,
@@ -908,6 +955,11 @@ class _EachRowofListViewState extends State<EachRowofListView> {
                   });
                   updatePresent(
                       widget.studentRoll, widget.uuid, widget.presentList);
+                  int roll = int.parse(widget.studentRoll.substring(4));
+                  widget.studentRollList[
+                      roll == 60 || roll == 120 || roll == 180
+                          ? 59
+                          : roll % 60 - 1] = widget.presentList;
                 },
                 duration: Duration(milliseconds: 200),
                 scaleFactor: 1.8,
@@ -936,9 +988,16 @@ class _EachRowofListViewState extends State<EachRowofListView> {
 }
 
 class CtMarksList extends StatefulWidget {
-  CtMarksList({Key key, this.studentRoll, this.index, this.colorRollIndex})
+  CtMarksList(
+      {Key key,
+      this.studentRoll,
+      this.index,
+      this.colorRollIndex,
+      this.ctMarks,
+      this.uuid})
       : super(key: key);
-  String studentRoll, colorRollIndex;
+  String studentRoll, colorRollIndex, uuid;
+  List ctMarks;
   int index;
   @override
   _CtMarksListState createState() => _CtMarksListState();
@@ -951,6 +1010,8 @@ class _CtMarksListState extends State<CtMarksList> {
       open3 = false,
       open4 = false,
       open5 = false;
+  final control = TextEditingController();
+
   @override
   bool textFieldOpener = false;
   Widget build(BuildContext context) {
@@ -990,11 +1051,22 @@ class _CtMarksListState extends State<CtMarksList> {
                       child: TextField(
                         autofocus: true,
                         keyboardType: TextInputType.number,
+                        controller: control,
                       ),
                       onFocusChange: (hasFocus) {
                         if (!hasFocus)
                           setState(() {
                             open1 = !open1;
+                            if (control.text.length >= 2) {
+                              widget.ctMarks[0] = control.text[0];
+                              widget.ctMarks[1] = control.text[1];
+                            } else if (control.text.length == 1) {
+                              widget.ctMarks[0] = '0';
+                              widget.ctMarks[1] = control.text[0];
+                            }
+                            control.text = '';
+                            updateCtMarks(widget.studentRoll, widget.uuid,
+                                widget.ctMarks);
                           });
                       },
                     )
@@ -1010,7 +1082,7 @@ class _CtMarksListState extends State<CtMarksList> {
                         });
                       },
                       child: Text(
-                        '17',
+                        widget.ctMarks[0] + widget.ctMarks[1],
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 18,
@@ -1041,17 +1113,28 @@ class _CtMarksListState extends State<CtMarksList> {
                     ? Focus(
                         child: TextField(
                           autofocus: true,
+                          controller: control,
                           keyboardType: TextInputType.number,
                         ),
                         onFocusChange: (hasFocus) {
                           if (!hasFocus)
                             setState(() {
                               open2 = !open2;
+                              if (control.text.length >= 2) {
+                                widget.ctMarks[2] = control.text[0];
+                                widget.ctMarks[3] = control.text[1];
+                              } else if (control.text.length == 1) {
+                                widget.ctMarks[2] = '0';
+                                widget.ctMarks[3] = control.text[0];
+                              }
+                              control.text = '';
+                              updateCtMarks(widget.studentRoll, widget.uuid,
+                                  widget.ctMarks);
                             });
                         },
                       )
                     : Text(
-                        '18',
+                        widget.ctMarks[2] + widget.ctMarks[3],
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 18,
@@ -1082,17 +1165,28 @@ class _CtMarksListState extends State<CtMarksList> {
                     ? Focus(
                         child: TextField(
                           autofocus: true,
+                          controller: control,
                           keyboardType: TextInputType.number,
                         ),
                         onFocusChange: (hasFocus) {
                           if (!hasFocus)
                             setState(() {
                               open3 = !open3;
+                              if (control.text.length >= 2) {
+                                widget.ctMarks[4] = control.text[0];
+                                widget.ctMarks[5] = control.text[1];
+                              } else if (control.text.length == 1) {
+                                widget.ctMarks[4] = '0';
+                                widget.ctMarks[5] = control.text[0];
+                              }
+                              control.text = '';
+                              updateCtMarks(widget.studentRoll, widget.uuid,
+                                  widget.ctMarks);
                             });
                         },
                       )
                     : Text(
-                        '19',
+                        widget.ctMarks[4] + widget.ctMarks[5],
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 18,
@@ -1123,17 +1217,28 @@ class _CtMarksListState extends State<CtMarksList> {
                     ? Focus(
                         child: TextField(
                           autofocus: true,
+                          controller: control,
                           keyboardType: TextInputType.number,
                         ),
                         onFocusChange: (hasFocus) {
                           if (!hasFocus)
                             setState(() {
                               open4 = !open4;
+                              if (control.text.length >= 2) {
+                                widget.ctMarks[6] = control.text[0];
+                                widget.ctMarks[7] = control.text[1];
+                              } else if (control.text.length == 1) {
+                                widget.ctMarks[6] = '0';
+                                widget.ctMarks[7] = control.text[0];
+                              }
+                              control.text = '';
+                              updateCtMarks(widget.studentRoll, widget.uuid,
+                                  widget.ctMarks);
                             });
                         },
                       )
                     : Text(
-                        '20',
+                        widget.ctMarks[6] + widget.ctMarks[7],
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 18,
@@ -1151,7 +1256,14 @@ class _CtMarksListState extends State<CtMarksList> {
             width: mwidth * .14,
             child: Center(
               child: Text(
-                '19',
+                calculate_average(widget.ctMarks[0] +
+                    widget.ctMarks[1] +
+                    widget.ctMarks[2] +
+                    widget.ctMarks[3] +
+                    widget.ctMarks[4] +
+                    widget.ctMarks[5] +
+                    widget.ctMarks[6] +
+                    widget.ctMarks[7]),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,
@@ -1222,4 +1334,18 @@ class _CtMarksListState extends State<CtMarksList> {
       ),
     );
   }
+}
+
+String calculate_average(String ctMarks) {
+  List<int> marks = [
+    int.parse(ctMarks.substring(0, 2)),
+    int.parse(ctMarks.substring(2, 4)),
+    int.parse(ctMarks.substring(4, 6)),
+    int.parse(ctMarks.substring(6))
+  ];
+  marks.sort((b, a) => a.compareTo(b));
+  int res = marks[0] + marks[1] + marks[2];
+
+  res = (res / 3).ceil();
+  return res.toString();
 }

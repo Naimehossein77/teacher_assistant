@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sample/components/allclass.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 import 'dart:io';
 import 'package:uuid/uuid.dart';
 
@@ -258,6 +260,23 @@ void updatePresent(String roll, String uuid, List presentList) {
       .then((value) => print("Updated the roll present"))
       .catchError((error) => print("failed to update roll present"));
 }
+void updateCtMarks(String roll, String uuid, List presentList) {
+  String present = '';
+  for (int i = 0; i < presentList.length; i++) {
+    present += presentList[i].toString();
+  }
+  print('present' + present);
+  FirebaseFirestore.instance
+      .collection('classes')
+      .doc(uuid)
+      .collection('ctmarks')
+      .doc('ctmarksdoc')
+      .set({
+        roll: present,
+      }, SetOptions(merge: true))
+      .then((value) => print("Updated the roll marks"))
+      .catchError((error) => print("failed to update roll marks"));
+}
 
 void createPresentSheet(int roll, String uuid) async {
   String present = '', ctMarks = '';
@@ -318,5 +337,61 @@ Future getPresentSheet(int roll, String uuid) async {
     return boxlist;
   } catch (e) {
     print(e.toString());
+  }
+}
+
+Future getCtMarksSheet(int roll, String uuid) async {
+  print(uuid);
+  List boxlist = List.generate(
+    60,
+    (i) => new List(),
+  );
+  String temp = '';
+  try {
+    await FirebaseFirestore.instance
+        .collection('classes')
+        .doc(uuid)
+        .collection('ctmarks')
+        .doc('ctmarksdoc')
+        .get()
+        .then((result) {
+      for (int i = 0; i < 60; i++, roll++) {
+        // print(result.data()[roll.toString()]);
+        temp = result.data()[roll.toString()];
+        print(temp);
+        for (int k = 0; k < 8; k++) {
+          boxlist[i].add(temp[k].toString());
+        }
+        // boxlist.add(result.data()[roll.toString()]);
+        // print(boxlist[i].length);
+
+      }
+    });
+    return boxlist;
+  } catch (e) {
+    print(e.toString());
+  }
+}
+
+
+
+Future<bool> check(context) async {
+  try {
+    final result = await InternetAddress.lookup('google.com');
+    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      print('connected');
+      return true;
+    }
+  } on SocketException catch (_) {
+    print('not connected');
+    showTopSnackBar(
+      context,
+      CustomSnackBar.error(
+        message:
+            "Something went wrong. Please check your Internet connection and try again",
+            
+      ),
+    );
+    return false;
   }
 }

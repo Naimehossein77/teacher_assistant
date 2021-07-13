@@ -4,13 +4,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:sample/components/allclass.dart';
 import 'package:sample/components/auth.dart';
 import 'package:sample/components/dashboard.dart';
 import 'package:sample/components/editprofile.dart';
 import 'package:sample/components/login.dart';
+import 'package:sample/components/qrcodescanner.dart';
 import 'package:sample/components/signup.dart';
 import 'package:sample/components/test.dart';
 import 'components/main_drawer.dart';
@@ -62,6 +61,7 @@ class _HomepageState extends State<Homepage> {
           '/allclass': (_) => allclass(),
           '/dashboard': (_) => dashboard(),
           '/editprofilepage': (_) => editprofilepage(),
+          '/qrcodescanner': (_) => QRViewExample(),
         },
       ),
     );
@@ -82,7 +82,7 @@ class _rootState extends State<root> {
     Model model = Model();
     User usermain = FirebaseAuth.instance.currentUser;
     print(usermain);
-    check();
+    check(context);
     // FirebaseAuth.instance.authStateChanges().listen((User user) {
     //   if (user == null) {
     //     print('user is signed out');
@@ -92,7 +92,7 @@ class _rootState extends State<root> {
     //   }
     // });
 
-    return (usermain == null) ? login() : Loading();
+    return usermain == null ? login() : allclass();
   }
 }
 
@@ -135,16 +135,5 @@ class MyNavigator {
   static void goToIntro(BuildContext context) {
     Navigator.of(context)
         .pushNamedAndRemoveUntil('/allclass', (Route<dynamic> route) => false);
-  }
-}
-
-void check() async {
-  try {
-    final result = await InternetAddress.lookup('google.com');
-    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-      print('connected');
-    }
-  } on SocketException catch (_) {
-    print('not connected');
   }
 }
