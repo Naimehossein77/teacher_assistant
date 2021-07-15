@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import 'package:sample/components/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -70,20 +71,25 @@ class _signupState extends State<signup> {
                 child: Form(
                   key: _formkey,
                   child: Padding(
-                    padding: EdgeInsets.only(top: mheight * .15),
+                    padding: EdgeInsets.only(top: mheight * .05),
                     child: Center(
                       child: Container(
-                        width: mwidth * .80,
+                        width: mwidth * .90,
                         child: ListView(
+                          //shrinkWrap: true,
+                          scrollDirection: Axis.vertical,
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(5.0),
                               child: TextFormField(
                                 controller: firstName,
                                 decoration: InputDecoration(
+                                  contentPadding:
+                                      new EdgeInsets.symmetric(vertical: 10),
                                   hintText: "ex: Xavier",
                                   labelText: 'First Name',
-                                  border: OutlineInputBorder(),
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10)),
                                   filled: true,
                                   fillColor: Colors.grey[200],
                                   prefixIcon: Padding(
@@ -108,9 +114,13 @@ class _signupState extends State<signup> {
                               child: TextFormField(
                                 controller: lastName,
                                 decoration: InputDecoration(
+                                  contentPadding: new EdgeInsets.symmetric(
+                                    vertical: 10.0,
+                                  ),
                                   hintText: "ex: David",
                                   labelText: 'Last Name',
-                                  border: OutlineInputBorder(),
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10)),
                                   filled: true,
                                   fillColor: Colors.grey[200],
                                   prefixIcon: Padding(
@@ -135,9 +145,13 @@ class _signupState extends State<signup> {
                               child: TextFormField(
                                 controller: sirdept,
                                 decoration: InputDecoration(
+                                  contentPadding: new EdgeInsets.symmetric(
+                                    vertical: 10.0,
+                                  ),
                                   hintText: "CSE/HUM/CE/ME",
                                   labelText: 'Your Department',
-                                  border: OutlineInputBorder(),
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10)),
                                   filled: true,
                                   fillColor: Colors.grey[200],
                                   prefixIcon: Padding(
@@ -164,9 +178,13 @@ class _signupState extends State<signup> {
                               child: TextFormField(
                                 controller: email,
                                 decoration: InputDecoration(
+                                  contentPadding: new EdgeInsets.symmetric(
+                                    vertical: 10.0,
+                                  ),
                                   hintText: "example@gmail.com",
                                   labelText: 'Enter Email',
-                                  border: OutlineInputBorder(),
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10)),
                                   filled: true,
                                   fillColor: Colors.grey[200],
                                   prefixIcon: Padding(
@@ -191,9 +209,13 @@ class _signupState extends State<signup> {
                               child: TextFormField(
                                 controller: password,
                                 decoration: InputDecoration(
+                                  contentPadding: new EdgeInsets.symmetric(
+                                    vertical: 10.0,
+                                  ),
                                   hintText: "Password",
                                   labelText: 'Enter Password',
-                                  border: OutlineInputBorder(),
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10)),
                                   filled: true,
                                   fillColor: Colors.grey[200],
                                   prefixIcon: Padding(
@@ -219,6 +241,92 @@ class _signupState extends State<signup> {
                                 warning,
                                 style: TextStyle(
                                     fontSize: 14, color: Colors.red[700]),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                  mwidth * .19, 10, mwidth * .19, 0),
+                              child: Container(
+                                width: 80.0,
+                                height: 40.0,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: <Color>[
+                                      Colors.green,
+                                      HexColor('#55d66b')
+                                    ],
+                                  ),
+                                ),
+                                child: RawMaterialButton(
+                                    // splashColor: Colors.black12,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    onPressed: () async {
+                                      if (_formkey.currentState.validate()) {
+                                        print('Signup Successful');
+                                      }
+                                      try {
+                                        UserCredential userCredential =
+                                            await FirebaseAuth.instance
+                                                .createUserWithEmailAndPassword(
+                                          email: email.text,
+                                          password: password.text,
+                                        )
+                                                .then((_) {
+                                          addUser(email.text + 'doc1');
+
+                                          Navigator.of(context)
+                                              .pushNamedAndRemoveUntil(
+                                                  '/login',
+                                                  (Route<dynamic> route) =>
+                                                      false);
+                                          return null;
+                                        });
+                                        setState(() {
+                                          loader = true;
+                                        });
+                                      } on FirebaseAuthException catch (e) {
+                                        if (e.code == 'weak-password') {
+                                          print(
+                                              'The password provided is too weak.');
+                                        } else if (e.code ==
+                                            'email-already-in-use') {
+                                          setState(() {
+                                            warning =
+                                                'Email account already exists. Try another email.';
+                                          });
+
+                                          print(
+                                              'The account already exists for that email.');
+                                        }
+                                      }
+                                    },
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      child: Wrap(children: [
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              55, 2, 40, 2),
+                                          child: Text("Sign Up",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16.0,
+                                                  fontWeight: FontWeight.w600)),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(2),
+                                          child: Icon(
+                                            Icons.arrow_forward,
+                                            color: Colors.white,
+                                            size: 21,
+                                          ),
+                                        )
+                                      ]),
+                                    )),
                               ),
                             ),
                             Container(

@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:sample/providers/providerQrcode.dart';
 
 class QRViewExample extends StatefulWidget {
   const QRViewExample({Key key, this.onSonChanged})

@@ -515,6 +515,7 @@ class _allclassState extends State<allclass> {
                     topRight: Radius.circular(38)),
                 color: Colors.white),
             child: Container(
+              height: mheight,
               child: GridView.builder(
                 itemCount: boxlist.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
