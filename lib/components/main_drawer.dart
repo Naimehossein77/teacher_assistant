@@ -130,6 +130,8 @@ class _MainDrawerState extends State<MainDrawer> {
                   lastName = '';
                   // boxlist = [''];
                   Navigator.of(context).pop();
+                  
+
                   Navigator.of(context).pushNamedAndRemoveUntil(
                       '/login', (Route<dynamic> route) => false);
                 },
