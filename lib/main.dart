@@ -8,6 +8,7 @@ import 'package:sample/components/allclass.dart';
 import 'package:sample/components/auth.dart';
 import 'package:sample/components/dashboard.dart';
 import 'package:sample/components/editprofile.dart';
+import 'package:sample/components/emailVarification.dart';
 import 'package:sample/components/login.dart';
 import 'package:sample/components/qrcodescanner.dart';
 import 'package:sample/components/signup.dart';
@@ -62,6 +63,7 @@ class _HomepageState extends State<Homepage> {
           '/dashboard': (_) => dashboard(),
           '/editprofilepage': (_) => editprofilepage(),
           '/qrcodescanner': (_) => QRViewExample(),
+          '/emailVarification': (_) => emailVarification(),
         },
       ),
     );
@@ -81,7 +83,7 @@ class _rootState extends State<root> {
   Widget build(BuildContext context) {
     Model model = Model();
     User usermain = FirebaseAuth.instance.currentUser;
-    print(usermain);
+
     check(context);
     // FirebaseAuth.instance.authStateChanges().listen((User user) {
     //   if (user == null) {
@@ -92,7 +94,7 @@ class _rootState extends State<root> {
     //   }
     // });
 
-    return usermain == null ? login() : allclass();
+    return usermain == null || !usermain.emailVerified ? login() : allclass();
   }
 }
 

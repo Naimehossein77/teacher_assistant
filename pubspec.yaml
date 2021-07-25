@@ -41,12 +41,13 @@ dependencies:
   uuid:
   hexcolor: 
   tab_indicator_styler: ^1.0.0
-  shimmer: ^1.1.2
+  shimmer: 
   google_fonts: 
   flutter_bounce:
   qr_code_scanner: ^0.3.5
   adobe_xd:
   flutter_svg:
+  loading_indicator: 
 
 
 

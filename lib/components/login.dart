@@ -195,8 +195,7 @@ class _loginState extends State<login> {
                                     ),
                                   ),
                                   Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(12, 5, 0, 0),
+                                    padding: EdgeInsets.fromLTRB(25, 5, 0, 0),
                                     child: Text(
                                       errormessage,
                                       style: TextStyle(
@@ -247,30 +246,49 @@ class _loginState extends State<login> {
                                                             email: email.text,
                                                             password:
                                                                 password.text);
-                                                setState(() {
-                                                  loader = true;
-                                                });
-                                                Navigator.pop(context);
-                                                Navigator.of(context).push(
-                                                    PageTransition(
-                                                        type: PageTransitionType
-                                                            .rightToLeft,
-                                                        child: allclass()));
+                                                // setState(() {
+                                                //   loader = true;
+                                                // });
+                                                FirebaseAuth
+                                                    .instance.currentUser
+                                                    .reload();
+                                                var user = await FirebaseAuth
+                                                    .instance.currentUser;
+                                                print(
+                                                    'user: ' + user.toString());
+                                                if (user.emailVerified) {
+                                                  print(user.emailVerified);
+                                                  Navigator.pop(context);
+                                                  Navigator.of(context).pushReplacement(
+                                                      PageTransition(
+                                                          type:
+                                                              PageTransitionType
+                                                                  .rightToLeft,
+                                                          child: allclass()));
+                                                } else {
+                                                  setState(() {
+                                                    errormessage =
+                                                        'Please Varify your Email Address';
+                                                    isLoading = false;
+                                                  });
+                                                }
                                               } on FirebaseAuthException catch (e) {
                                                 if (e.code ==
                                                     'user-not-found') {
                                                   print(
                                                       'No user found for that email.');
+                                                  errormessage =
+                                                      'Wrong Email Address';
                                                 } else if (e.code ==
                                                     'wrong-password') {
                                                   print(
                                                       'Wrong password provided for that user.');
+                                                  errormessage =
+                                                      'Wrong Password!';
                                                 }
                                                 dynamic ok = check(context);
 
                                                 setState(() {
-                                                  errormessage =
-                                                      'Wrong Username or Password';
                                                   isLoading = false;
 
                                                   // cn = Container(
@@ -326,7 +344,7 @@ class _loginState extends State<login> {
                                       child: RichText(
                                         text: TextSpan(children: [
                                           TextSpan(
-                                              text: 'Don\'t have an account? ',
+                                              text: 'Don\'t have an account?',
                                               style: TextStyle(
                                                   fontSize: 12,
                                                   color: Colors.grey[600])),
@@ -421,21 +439,4 @@ class _loginState extends State<login> {
 }
 
 // LOADING==============================================================================================================================
-class Loading extends StatelessWidget {
-  const Loading({Key key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        color: Colors.white60,
-        child: Center(
-          child: SpinKitThreeBounce(
-            color: Colors.pink[100],
-            size: 100,
-          ),
-        ),
-      ),
-    );
-  }
-}

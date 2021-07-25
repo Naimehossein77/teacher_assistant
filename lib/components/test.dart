@@ -34,16 +34,16 @@ class Model {
 
   var _firestore = FirebaseFirestore.instance;
 // GETLIST OF THE DATA===============================================================================================================
-  Future GetallList() async {
+  Future GetallList(String uid) async {
     List boxlist = [], classroomcode = [];
 
     try {
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(users.email + 'doc1')
+          .doc(uid + 'doc1')
           .get()
           .then((value) {
-        print('value.ata()');
+        print('value.data()');
         print(value.data());
         List.from(value.data()['classcodes']).forEach((element) {
           classroomcode.add(element);
@@ -99,6 +99,7 @@ class Model {
 // ADD CLASSROOM TO CLASSES===================================================================================================================
   void add_classroom_to_classes(String dept, String series, String section,
       String course, String course_code, String uuid, int firstRoll) {
+    print(users.uid);
     FirebaseFirestore.instance
         .collection('classes')
         .doc(uuid)
@@ -135,10 +136,7 @@ class Model {
     //     .catchError(
     //         (error) => print("Failed to add user: User already available"));
 
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(users.email + 'doc1')
-        .set({
+    FirebaseFirestore.instance.collection('users').doc(users.uid + 'doc1').set({
       'classcodes': FieldValue.arrayUnion([uuid]),
     }, SetOptions(merge: true));
   }
@@ -186,10 +184,10 @@ class Profile {
 
   Future getProfile() async {
     try {
-      print(users.email + 'doc1');
+      print(users.uid + 'doc1');
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(users.email + 'doc1')
+          .doc(users.uid + 'doc1')
           .get()
           .then((result) {
         print('you are there');
@@ -260,6 +258,7 @@ void updatePresent(String roll, String uuid, List presentList) {
       .then((value) => print("Updated the roll present"))
       .catchError((error) => print("failed to update roll present"));
 }
+
 void updateCtMarks(String roll, String uuid, List presentList) {
   String present = '';
   for (int i = 0; i < presentList.length; i++) {
@@ -373,8 +372,6 @@ Future getCtMarksSheet(int roll, String uuid) async {
   }
 }
 
-
-
 Future<bool> check(context) async {
   try {
     final result = await InternetAddress.lookup('google.com');
@@ -389,9 +386,38 @@ Future<bool> check(context) async {
       CustomSnackBar.error(
         message:
             "Something went wrong. Please check your Internet connection and try again",
-            
       ),
     );
     return false;
   }
+}
+
+successAlert(context, String message) {
+  showTopSnackBar(
+    context,
+    CustomSnackBar.success(
+      message: message,
+      textStyle: TextStyle(color: Colors.black),
+    ),
+  );
+}
+
+errorAlert(context, String message) {
+  showTopSnackBar(
+    context,
+    CustomSnackBar.error(
+      message: message,
+      textStyle: TextStyle(color: Colors.black),
+    ),
+  );
+}
+
+infoAlert(context, String message) {
+  showTopSnackBar(
+    context,
+    CustomSnackBar.error(
+      message: message,
+      textStyle: TextStyle(color: Colors.black),
+    ),
+  );
 }

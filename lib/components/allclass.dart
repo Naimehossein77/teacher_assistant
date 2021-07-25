@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:bouncing_widget/bouncing_widget.dart';
+import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,18 +8,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bounce/flutter_bounce.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:image_picker/image_picker.dart';
+
 import 'package:page_transition/page_transition.dart';
-import 'package:provider/provider.dart';
+
 import 'package:sample/components/dashboard.dart';
 import 'package:sample/components/main_drawer.dart';
 import 'package:sample/components/qrcodescanner.dart';
+import 'package:sample/components/shimmerEffect.dart';
 import 'package:sample/components/test.dart';
-import 'package:sample/main.dart';
-import 'package:validators/validators.dart';
-import 'login.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:validators/validators.dart';
 import 'test.dart';
 import 'package:uuid/uuid.dart';
 
@@ -38,6 +32,7 @@ class allclass extends StatefulWidget {
 // WIDGET STATE
 class _allclassState extends State<allclass> {
   final _formkey = GlobalKey<FormState>();
+  final _classRoomCodeKey = GlobalKey<FormState>();
   final dept = TextEditingController();
   final series = TextEditingController();
   final section = TextEditingController();
@@ -60,14 +55,18 @@ class _allclassState extends State<allclass> {
         ),
       ],
       result = [];
-  static int cnt = 0;
-  String mdept = '', mseries = '', msection = '', msubject = '', _string;
+  bool isShimmer = true;
+
   CollectionReference users = FirebaseFirestore.instance.collection('users');
 
-  void updateQRCode(String code) {
-    Model().add_class_to_id(code);
-    print('qr code added to id');
-    refreshList();
+  void updateQRCode(String qrCode) {
+    Model().add_class_to_id(qrCode);
+    setState(() {
+      classRoom_code.text = qrCode;
+    });
+    print('qr code added to id ' + qrCode);
+    successAlert(context, 'ClassRoom Added Successfully');
+    //refreshList();
   }
 
   @override
@@ -77,18 +76,25 @@ class _allclassState extends State<allclass> {
     if (boxlist.length == 1) {
       fetchDatabaseList();
     }
+    FirebaseAuth.instance.currentUser.reload();
     super.initState();
   }
 
   fetchDatabaseList() async {
     print('fetchdata is called in allclass');
-    dynamic resultant = await Model().GetallList();
-    if (resultant == null)
+    print(FirebaseAuth.instance.currentUser.uid + ' in all class');
+    dynamic resultant =
+        await Model().GetallList(FirebaseAuth.instance.currentUser.uid);
+    if (resultant == null) {
       print('unable to retrieve');
-    else {
+      setState(() {
+        isShimmer = false;
+      });
+    } else {
       print('data fetched from allclass');
       setState(() {
         result = boxlist = resultant;
+        isShimmer = false;
       });
     }
   }
@@ -104,6 +110,9 @@ class _allclassState extends State<allclass> {
   }
 
   Future<Null> refreshList() async {
+    setState(() {
+      isShimmer = true;
+    });
     await Future.delayed(Duration(seconds: 1));
     print('refreshlist is turned on');
     fetchDatabaseList();
@@ -184,16 +193,20 @@ class _allclassState extends State<allclass> {
             first_roll.text = '';
             classRoom_code.text = '';
           });
-          showDialog(
+          showGeneralDialog(
               context: context,
-              builder: (context) {
+              transitionDuration: Duration(milliseconds: 400),
+              pageBuilder: (context, anim3, anim7) {
                 return Dialog(
+                  insetAnimationDuration: Duration(milliseconds: 300),
+                  insetAnimationCurve: Curves.ease,
+                  insetPadding: EdgeInsets.all(0),
                   child: Form(
                     key: _formkey,
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
                       child: Container(
-                        height: mheight * .80,
+                        height: mheight * 1,
                         width: mwidth * .95,
                         child: ListView(
                           children: [
@@ -224,68 +237,160 @@ class _allclassState extends State<allclass> {
                                 child: TextFormField(
                                   controller: classRoom_code,
                                   decoration: InputDecoration(
+                                    contentPadding: new EdgeInsets.symmetric(
+                                        vertical: 10.0, horizontal: 5.0),
                                     hintText: "ex: abcde7gh",
                                     labelText: 'Classroom Code.',
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(20),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                     filled: true,
                                     fillColor: Colors.grey[50],
                                   ),
-                                  validator: (String value) {
-                                    if (value.isEmpty || value.length != 8)
-                                      return 'Enter Correct Classroom Code';
-                                    return null;
-                                  },
+                                  // validator: (String value) {
+                                  //   if (value.isEmpty || value.length != 7)
+                                  //     return 'Enter Correct Classroom Code';
+                                  //   return null;
+                                  // },
                                 ),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(5.0),
-                              child: ButtonTheme(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20)),
-                                height: mheight * .06,
-                                child: RaisedButton(
-                                  onPressed: () {
-                                    if (classRoom_code.text.length == 7) {
-                                      setState(() {
-                                        Model().add_class_to_id(
-                                            classRoom_code.text);
-                                      });
-                                      refreshList();
-
-                                      dept.text = '';
-                                      series.text = '';
-                                      section.text = '';
-                                      course_code.text = '';
-                                      course.text = '';
-                                      first_roll.text = '';
-                                      Navigator.pop(context);
-                                    }
-                                  },
-                                  child: Text(
-                                    'Join ClassRoom',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 16),
+                              padding: EdgeInsets.fromLTRB(
+                                  mwidth * .10, 5, mwidth * .10, 10),
+                              child: Container(
+                                width: 80.0,
+                                height: 40.0,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: <Color>[
+                                      HexColor('#631C8C'),
+                                      HexColor('#8046A1')
+                                    ],
                                   ),
-                                  color: HexColor('#F44236'),
                                 ),
+                                child: RawMaterialButton(
+                                    // splashColor: Colors.black12,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    onPressed: () async {
+                                      if (classRoom_code.text.length == 7) {
+                                        setState(() {
+                                          Model().add_class_to_id(
+                                              classRoom_code.text);
+                                          successAlert(context,
+                                              'ClassRoom Added Successfully');
+                                        });
+                                        refreshList();
+
+                                        dept.text = '';
+                                        series.text = '';
+                                        section.text = '';
+                                        course_code.text = '';
+                                        course.text = '';
+                                        first_roll.text = '';
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      child: Wrap(children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(1),
+                                          child: Icon(
+                                            FontAwesomeIcons.plusSquare,
+                                            color: Colors.white,
+                                            // size: 21,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              5, 2, 18, 2),
+                                          child: Text("Create ClassRoom",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16.0,
+                                                  fontWeight: FontWeight.w600)),
+                                        ),
+                                      ]),
+                                    )),
                               ),
                             ),
-                            RaisedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => QRViewExample(
-                                              onSonChanged: updateQRCode,
-                                            )));
-                              },
-                              child: Text('Scan QR Code'),
+                            //   child: ButtonTheme(
+                            //     shape: RoundedRectangleBorder(
+                            //         borderRadius: BorderRadius.circular(20)),
+                            //     height: mheight * .06,
+                            //     child: RaisedButton(
+                            //       onPressed: () {
+                            //         if (classRoom_code.text.length == 7 && _classRoomCodeKey.currentState.validate()) {
+                            //           setState(() {
+                            //             Model().add_class_to_id(
+                            //                 classRoom_code.text);
+                            //           });
+                            //           refreshList();
+
+                            //           dept.text = '';
+                            //           series.text = '';
+                            //           section.text = '';
+                            //           course_code.text = '';
+                            //           course.text = '';
+                            //           first_roll.text = '';
+                            //           Navigator.pop(context);
+                            //         }
+                            //       },
+                            //       child: Text(
+                            //         'Join ClassRoom',
+                            //         style: TextStyle(
+                            //             color: Colors.white, fontSize: 16),
+                            //       ),
+
+                            //       color: HexColor('#F44236'),
+                            //     ),
+                            //   ),
+                            // ),
+                            // RaisedButton(
+                            //   onPressed: () {
+                            //     Navigator.push(
+                            //         context,
+                            //         MaterialPageRoute(
+                            //             builder: (context) => QRViewExample(
+                            //                   onSonChanged: updateQRCode,
+                            //                 )));
+                            //   },
+                            //   child: Text('Scan QR Code'),
+                            // ),
+                            Container(
+                                width: 60.0,
+                                height: 40.0,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: mwidth * .10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: OutlinedButton.icon(
+                                    icon: Icon(Icons.qr_code_scanner),
+                                    label: Text('Scan ClassRoom Code'),
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  QRViewExample(
+                                                    onSonChanged: updateQRCode,
+                                                  )));
+                                    })),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              child: Divider(
+                                thickness: 1,
+                              ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.only(bottom: 10),
                               child: Center(
                                   child: Text(
                                 'Or',
@@ -300,10 +405,12 @@ class _allclassState extends State<allclass> {
                                 child: TextFormField(
                                   controller: dept,
                                   decoration: InputDecoration(
+                                    contentPadding: new EdgeInsets.symmetric(
+                                        vertical: 10.0, horizontal: 5.0),
                                     hintText: "ex: CSE/EEE/ME",
                                     labelText: 'Enter Dept.',
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(20),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                     filled: true,
                                     fillColor: Colors.grey[100],
@@ -322,11 +429,13 @@ class _allclassState extends State<allclass> {
                                 child: TextFormField(
                                   controller: series,
                                   decoration: InputDecoration(
+                                    contentPadding: new EdgeInsets.symmetric(
+                                        vertical: 10.0, horizontal: 5.0),
                                     hintText: "ex: 18/19/20",
                                     labelText: 'Enter Series',
                                     border: OutlineInputBorder(
                                         borderRadius:
-                                            BorderRadius.circular(20)),
+                                            BorderRadius.circular(10)),
                                     filled: true,
                                     fillColor: Colors.grey[100],
                                   ),
@@ -345,11 +454,13 @@ class _allclassState extends State<allclass> {
                                 child: TextFormField(
                                   controller: section,
                                   decoration: InputDecoration(
+                                    contentPadding: new EdgeInsets.symmetric(
+                                        vertical: 10.0, horizontal: 5.0),
                                     hintText: "ex: A/B/C",
                                     labelText: 'Enter Section',
                                     border: OutlineInputBorder(
                                         borderRadius:
-                                            BorderRadius.circular(20)),
+                                            BorderRadius.circular(10)),
                                     filled: true,
                                     fillColor: Colors.grey[100],
                                   ),
@@ -367,11 +478,13 @@ class _allclassState extends State<allclass> {
                                 child: TextFormField(
                                   controller: course,
                                   decoration: InputDecoration(
+                                    contentPadding: new EdgeInsets.symmetric(
+                                        vertical: 10.0, horizontal: 5.0),
                                     hintText: "ex: CSE/HUM/EEE",
                                     labelText: 'Enter Course',
                                     border: OutlineInputBorder(
                                         borderRadius:
-                                            BorderRadius.circular(20)),
+                                            BorderRadius.circular(10)),
                                     filled: true,
                                     fillColor: Colors.grey[100],
                                   ),
@@ -389,11 +502,13 @@ class _allclassState extends State<allclass> {
                                 child: TextFormField(
                                   controller: course_code,
                                   decoration: InputDecoration(
+                                    contentPadding: new EdgeInsets.symmetric(
+                                        vertical: 10.0, horizontal: 5.0),
                                     hintText: "ex: 2201/2113",
                                     labelText: 'Enter Course Code',
                                     border: OutlineInputBorder(
                                         borderRadius:
-                                            BorderRadius.circular(20)),
+                                            BorderRadius.circular(10)),
                                     filled: true,
                                     fillColor: Colors.grey[100],
                                   ),
@@ -413,11 +528,13 @@ class _allclassState extends State<allclass> {
                                 child: TextFormField(
                                   controller: first_roll,
                                   decoration: InputDecoration(
+                                    contentPadding: new EdgeInsets.symmetric(
+                                        vertical: 10.0, horizontal: 5.0),
                                     hintText: "ex: 1803121/1803001/1803061",
                                     labelText: 'Enter Fist Roll',
                                     border: OutlineInputBorder(
                                         borderRadius:
-                                            BorderRadius.circular(20)),
+                                            BorderRadius.circular(10)),
                                     filled: true,
                                     fillColor: Colors.grey[100],
                                   ),
@@ -432,63 +549,157 @@ class _allclassState extends State<allclass> {
                             ),
                             Padding(
                               padding: const EdgeInsets.all(5.0),
-                              child: ButtonTheme(
-                                height: mheight * .06,
-                                child: RaisedButton(
-                                  onPressed: () {
-                                    classRoom_code.text = 'abcdefgh';
-                                    if (_formkey.currentState.validate()) {
-                                      // Navigator.pop(context);
-                                      Navigator.pop(context);
-                                      String uuid = Uuid().v1().substring(0, 7);
-                                      dept.text = dept.text.toUpperCase();
-                                      section.text = section.text.toUpperCase();
-                                      course.text = course.text.toUpperCase();
 
-                                      if (!true)
-                                        print('classroom already exists');
-                                      else {
-                                        setState(() {
-                                          Model().add_classroom_to_classes(
-                                              dept.text,
-                                              series.text,
-                                              section.text,
-                                              course.text,
-                                              course_code.text,
-                                              uuid,
-                                              int.parse(first_roll.text));
-                                          Model().add_class_to_id(uuid);
-                                          if (boxlist[0].dept == '')
-                                            boxlist.clear();
-                                          boxlist.add(listitem(
-                                            dept: dept.text,
-                                            series: series.text,
-                                            section: section.text,
-                                            course: course.text,
-                                            course_code: course_code.text,
-                                            first_roll: first_roll.text,
-                                            uuid: uuid,
-                                          ));
-                                        });
-                                      }
-                                      dept.text = '';
-                                      series.text = '';
-                                      section.text = '';
-                                      course_code.text = '';
-                                      course.text = '';
-                                      first_roll.text = '';
-                                    }
-                                  },
-                                  child: Text(
-                                    'Create ClassRoom',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 16),
+                              child: Container(
+                                width: 80.0,
+                                height: 40.0,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: <Color>[
+                                      Colors.green,
+                                      HexColor('#55d66b')
+                                    ],
                                   ),
-                                  color: HexColor('#5CB85C'),
                                 ),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20)),
+                                child: RawMaterialButton(
+                                    // splashColor: Colors.black12,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    onPressed: () async {
+                                      classRoom_code.text = '';
+                                      if (_formkey.currentState.validate()) {
+                                        // Navigator.pop(context);
+                                        Navigator.pop(context);
+                                        String uuid =
+                                            Uuid().v1().substring(0, 7);
+                                        dept.text = dept.text.toUpperCase();
+                                        section.text =
+                                            section.text.toUpperCase();
+                                        course.text = course.text.toUpperCase();
+
+                                        if (!true)
+                                          print('classroom already exists');
+                                        else {
+                                          setState(() {
+                                            Model().add_classroom_to_classes(
+                                                dept.text,
+                                                series.text,
+                                                section.text,
+                                                course.text,
+                                                course_code.text,
+                                                uuid,
+                                                int.parse(first_roll.text));
+                                            Model().add_class_to_id(uuid);
+                                            if (boxlist[0].dept == '')
+                                              boxlist.clear();
+                                            boxlist.add(listitem(
+                                              dept: dept.text,
+                                              series: series.text,
+                                              section: section.text,
+                                              course: course.text,
+                                              course_code: course_code.text,
+                                              first_roll: first_roll.text,
+                                              uuid: uuid,
+                                            ));
+                                            successAlert(context,
+                                                'ClassRoom Created Successfully');
+                                          });
+                                        }
+                                        dept.text = '';
+                                        series.text = '';
+                                        section.text = '';
+                                        course_code.text = '';
+                                        course.text = '';
+                                        first_roll.text = '';
+                                      }
+                                    },
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      child: Wrap(children: [
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              55, 2, 40, 2),
+                                          child: Text("Create ClassRoom",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16.0,
+                                                  fontWeight: FontWeight.w600)),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(2),
+                                          child: Icon(
+                                            Icons.arrow_forward,
+                                            color: Colors.white,
+                                            size: 21,
+                                          ),
+                                        )
+                                      ]),
+                                    )),
                               ),
+
+                              // child: ButtonTheme(
+                              //   height: mheight * .06,
+                              //   child: RaisedButton(
+                              //     onPressed: () {
+                              //       classRoom_code.text = '';
+                              //       if (_formkey.currentState.validate()) {
+                              //         // Navigator.pop(context);
+                              //         Navigator.pop(context);
+                              //         String uuid = Uuid().v1().substring(0, 7);
+                              //         dept.text = dept.text.toUpperCase();
+                              //         section.text = section.text.toUpperCase();
+                              //         course.text = course.text.toUpperCase();
+
+                              //         if (!true)
+                              //           print('classroom already exists');
+                              //         else {
+                              //           setState(() {
+                              //             Model().add_classroom_to_classes(
+                              //                 dept.text,
+                              //                 series.text,
+                              //                 section.text,
+                              //                 course.text,
+                              //                 course_code.text,
+                              //                 uuid,
+                              //                 int.parse(first_roll.text));
+                              //             Model().add_class_to_id(uuid);
+                              //             if (boxlist[0].dept == '')
+                              //               boxlist.clear();
+                              //             boxlist.add(listitem(
+                              //               dept: dept.text,
+                              //               series: series.text,
+                              //               section: section.text,
+                              //               course: course.text,
+                              //               course_code: course_code.text,
+                              //               first_roll: first_roll.text,
+                              //               uuid: uuid,
+                              //             ));
+                              //             successAlert(context,
+                              //                 'ClassRoom Created Successfully');
+                              //           });
+                              //         }
+                              //         dept.text = '';
+                              //         series.text = '';
+                              //         section.text = '';
+                              //         course_code.text = '';
+                              //         course.text = '';
+                              //         first_roll.text = '';
+                              //       }
+                              //     },
+                              //     child: Text(
+                              //       'Create ClassRoom',
+                              //       style: TextStyle(
+                              //           color: Colors.white, fontSize: 16),
+                              //     ),
+                              //     color: HexColor('#5CB85C'),
+                              //   ),
+                              //   shape: RoundedRectangleBorder(
+                              //       borderRadius: BorderRadius.circular(20)),
+                              // ),
                             )
                           ],
                         ),
@@ -514,37 +725,39 @@ class _allclassState extends State<allclass> {
                     topLeft: Radius.circular(38),
                     topRight: Radius.circular(38)),
                 color: Colors.white),
-            child: Container(
-              height: mheight,
-              child: GridView.builder(
-                itemCount: boxlist.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 0,
-                    crossAxisSpacing: 5,
-                    childAspectRatio: .8),
-                shrinkWrap: true,
-                // ignore: missing_return
-                itemBuilder: (BuildContext context, int index) {
-                  return Column(
-                    children: [
-                      BoxList(
-                        dept: boxlist[index].dept,
-                        series: boxlist[index].series,
-                        section: boxlist[index].section,
-                        course: boxlist[index].course,
-                        course_code: boxlist[index].course_code,
-                        uuid: boxlist[index].uuid,
-                        first_roll: boxlist[index].first_roll,
-                      ),
-                      SizedBox(
-                        height: 0,
-                      )
-                    ],
-                  );
-                },
-              ),
-            ),
+            child: isShimmer
+                ? LoadingListPage()
+                : Container(
+                    height: mheight,
+                    child: GridView.builder(
+                      itemCount: boxlist.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 0,
+                          crossAxisSpacing: 5,
+                          childAspectRatio: .8),
+                      shrinkWrap: true,
+                      // ignore: missing_return
+                      itemBuilder: (BuildContext context, int index) {
+                        return Column(
+                          children: [
+                            BoxList(
+                              dept: boxlist[index].dept,
+                              series: boxlist[index].series,
+                              section: boxlist[index].section,
+                              course: boxlist[index].course,
+                              course_code: boxlist[index].course_code,
+                              uuid: boxlist[index].uuid,
+                              first_roll: boxlist[index].first_roll,
+                            ),
+                            SizedBox(
+                              height: 0,
+                            )
+                          ],
+                        );
+                      },
+                    ),
+                  ),
           ),
         ),
       ),
@@ -602,7 +815,7 @@ class BoxListState extends State<BoxList> {
         Navigator.of(context).push(PageTransition(
             type: PageTransitionType.rightToLeft,
             alignment: Alignment.center,
-            duration: Duration(milliseconds: 500),
+            duration: Duration(milliseconds: 300),
             child: dashboard(
               appBarTitle: widget.dept +
                   '\'' +

@@ -36,14 +36,14 @@ class _QRViewExampleState extends State<QRViewExample> {
 
   @override
   Widget build(BuildContext context) {
-    if (result != null && result.code.length == 7) {
-      widget.onSonChanged(result.code);
-      Navigator.pop(context);
-    }
+    // if (result != null && result.code.length == 7) {
+    //   widget.onSonChanged(result.code);
+    //   Navigator.pop(context);
+    // }
     return Scaffold(
       body: Column(
         children: <Widget>[
-          Expanded(flex: 4, child: _buildQrView(context)),
+          Expanded(flex: 5, child: _buildQrView(context)),
           Expanded(
             flex: 1,
             child: FittedBox(
@@ -52,73 +52,75 @@ class _QRViewExampleState extends State<QRViewExample> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   if (result != null)
-                    Text(
-                        'Barcode Type: ${describeEnum(result.format)}   Data: ${result.code}')
+                    Text('ClassRoom Code: ${result.code}')
                   else
-                    Text('Scan a code'),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.toggleFlash();
-                              setState(() {});
-                            },
-                            child: FutureBuilder(
-                              future: controller?.getFlashStatus(),
-                              builder: (context, snapshot) {
-                                return Text('Flash: ${snapshot.data}');
-                              },
-                            )),
-                      ),
-                      Container(
-                        margin: EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.flipCamera();
-                              setState(() {});
-                            },
-                            child: FutureBuilder(
-                              future: controller?.getCameraInfo(),
-                              builder: (context, snapshot) {
-                                if (snapshot.data != null) {
-                                  return Text(
-                                      'Camera facing ${describeEnum(snapshot.data)}');
-                                } else {
-                                  return Text('loading');
-                                }
-                              },
-                            )),
-                      )
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.all(8),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await controller?.pauseCamera();
-                          },
-                          child: Text('pause', style: TextStyle(fontSize: 20)),
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.all(8),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await controller?.resumeCamera();
-                          },
-                          child: Text('resume', style: TextStyle(fontSize: 20)),
-                        ),
-                      )
-                    ],
-                  ),
+                    Text(
+                      'Scan ClassRoom QR Code',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   crossAxisAlignment: CrossAxisAlignment.center,
+                  //   children: <Widget>[
+                  //     Container(
+                  //       margin: EdgeInsets.all(8),
+                  //       child: ElevatedButton(
+                  //           onPressed: () async {
+                  //             await controller?.toggleFlash();
+                  //             setState(() {});
+                  //           },
+                  //           child: FutureBuilder(
+                  //             future: controller?.getFlashStatus(),
+                  //             builder: (context, snapshot) {
+                  //               return Text('Flash: ${snapshot.data}');
+                  //             },
+                  //           )),
+                  //     ),
+                  //     Container(
+                  //       margin: EdgeInsets.all(8),
+                  //       child: ElevatedButton(
+                  //           onPressed: () async {
+                  //             await controller?.flipCamera();
+                  //             setState(() {});
+                  //           },
+                  //           child: FutureBuilder(
+                  //             future: controller?.getCameraInfo(),
+                  //             builder: (context, snapshot) {
+                  //               if (snapshot.data != null) {
+                  //                 return Text(
+                  //                     'Camera facing ${describeEnum(snapshot.data)}');
+                  //               } else {
+                  //                 return Text('loading');
+                  //               }
+                  //             },
+                  //           )),
+                  //     )
+                  //   ],
+                  // ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   crossAxisAlignment: CrossAxisAlignment.center,
+                  //   children: <Widget>[
+                  //     Container(
+                  //       margin: EdgeInsets.all(8),
+                  //       child: ElevatedButton(
+                  //         onPressed: () async {
+                  //           await controller?.pauseCamera();
+                  //         },
+                  //         child: Text('pause', style: TextStyle(fontSize: 20)),
+                  //       ),
+                  //     ),
+                  //     Container(
+                  //       margin: EdgeInsets.all(8),
+                  //       child: ElevatedButton(
+                  //         onPressed: () async {
+                  //           await controller?.resumeCamera();
+                  //         },
+                  //         child: Text('resume', style: TextStyle(fontSize: 20)),
+                  //       ),
+                  //     )
+                  //   ],
+                  // ),
                 ],
               ),
             ),
@@ -136,6 +138,22 @@ class _QRViewExampleState extends State<QRViewExample> {
         : 400.0;
     // To ensure the Scanner view is properly sizes after rotation
     // we need to listen for Flutter SizeChanged notification and update controller
+
+    void _onQRViewCreated(QRViewController controller) {
+      this.controller = controller;
+
+      controller.scannedDataStream.listen((scanData) {
+        result = scanData;
+        print(result.code);
+        if (result != null && result.code.length == 7) {
+          widget.onSonChanged(result.code);
+          Navigator.pop(context);
+          Navigator.of(context).pushNamedAndRemoveUntil(
+              '/allclass', (Route<dynamic> route) => false);
+        }
+      });
+    }
+
     return QRView(
       key: qrKey,
       onQRViewCreated: _onQRViewCreated,
@@ -146,17 +164,6 @@ class _QRViewExampleState extends State<QRViewExample> {
           borderWidth: 10,
           cutOutSize: scanArea),
     );
-  }
-
-  void _onQRViewCreated(QRViewController controller) {
-    setState(() {
-      this.controller = controller;
-    });
-    controller.scannedDataStream.listen((scanData) {
-      setState(() {
-        result = scanData;
-      });
-    });
   }
 
   @override

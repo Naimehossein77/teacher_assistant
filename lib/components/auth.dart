@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:uuid/uuid.dart';
 
 class Userr {
   Userr({@required this.uid, this.photoUrl, this.displayName});
@@ -21,7 +22,6 @@ abstract class AuthBase {
 
 class Auth implements AuthBase {
   final _firebaseAuth = FirebaseAuth.instance;
-
   Userr _userFromFirebase(User user) {
     if (user == null) {
       return null;
@@ -45,7 +45,7 @@ class Auth implements AuthBase {
     return user.uid;
   }
 
-  Future<User> currentUser() async {
+  currentUser() async {
     final user = await _firebaseAuth.currentUser;
     return user;
   }

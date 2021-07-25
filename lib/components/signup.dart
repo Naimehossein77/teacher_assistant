@@ -4,10 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
+import 'package:sample/components/allclass.dart';
+import 'package:sample/components/auth.dart';
+import 'package:sample/components/emailVarification.dart';
+import 'package:sample/components/loadingSpinkit.dart';
 import 'package:sample/components/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:validators/validators.dart';
 import 'main_drawer.dart';
+import 'auth.dart';
 
 class signup extends StatefulWidget {
   signup({Key key}) : super(key: key);
@@ -51,6 +56,10 @@ class _signupState extends State<signup> {
               (error) => print("Failed to add user: User already available"));
     }
 
+    Future<String> getUid() async {
+      return await FirebaseAuth.instance.currentUser.uid;
+    }
+
     return loader
         ? Loading()
         : GestureDetector(
@@ -63,7 +72,7 @@ class _signupState extends State<signup> {
                 actions: [
                   Padding(
                     padding: const EdgeInsets.only(right: 11.0),
-                    child: Icon(Icons.ac_unit),
+                    child: Icon(FontAwesomeIcons.smile),
                   )
                 ],
               ),
@@ -268,40 +277,41 @@ class _signupState extends State<signup> {
                                     onPressed: () async {
                                       if (_formkey.currentState.validate()) {
                                         print('Signup Successful');
-                                      }
-                                      try {
-                                        UserCredential userCredential =
-                                            await FirebaseAuth.instance
-                                                .createUserWithEmailAndPassword(
-                                          email: email.text,
-                                          password: password.text,
-                                        )
-                                                .then((_) {
-                                          addUser(email.text + 'doc1');
 
-                                          Navigator.of(context)
-                                              .pushNamedAndRemoveUntil(
-                                                  '/login',
-                                                  (Route<dynamic> route) =>
-                                                      false);
-                                          return null;
-                                        });
-                                        setState(() {
-                                          loader = true;
-                                        });
-                                      } on FirebaseAuthException catch (e) {
-                                        if (e.code == 'weak-password') {
-                                          print(
-                                              'The password provided is too weak.');
-                                        } else if (e.code ==
-                                            'email-already-in-use') {
-                                          setState(() {
-                                            warning =
-                                                'Email account already exists. Try another email.';
+                                        try {
+                                          UserCredential userCredential =
+                                              await FirebaseAuth.instance
+                                                  .createUserWithEmailAndPassword(
+                                            email: email.text,
+                                            password: password.text,
+                                          )
+                                                  .then((_) {
+                                            addUser(_.user.uid + 'doc1');
+                                            print('ADDUSER ' + _.user.uid);
+                                            Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        emailVarification()));
+                                            return null;
                                           });
+                                          setState(() {
+                                            loader = true;
+                                          });
+                                        } on FirebaseAuthException catch (e) {
+                                          if (e.code == 'weak-password') {
+                                            print(
+                                                'The password provided is too weak.');
+                                          } else if (e.code ==
+                                              'email-already-in-use') {
+                                            setState(() {
+                                              warning =
+                                                  'Email account already exists. Try another email.';
+                                            });
 
-                                          print(
-                                              'The account already exists for that email.');
+                                            print(
+                                                'The account already exists for that email.');
+                                          }
                                         }
                                       }
                                     },
@@ -329,68 +339,6 @@ class _signupState extends State<signup> {
                                     )),
                               ),
                             ),
-                            Container(
-                              height: 60,
-                              child: RaisedButton(
-                                onPressed: () async {
-                                  if (_formkey.currentState.validate()) {
-                                    print('Signup Successful');
-                                  }
-                                  try {
-                                    UserCredential userCredential =
-                                        await FirebaseAuth.instance
-                                            .createUserWithEmailAndPassword(
-                                      email: email.text,
-                                      password: password.text,
-                                    )
-                                            .then((_) {
-                                      addUser(email.text + 'doc1');
-
-                                      Navigator.of(context)
-                                          .pushNamedAndRemoveUntil('/login',
-                                              (Route<dynamic> route) => false);
-                                      return null;
-                                    });
-                                  } on FirebaseAuthException catch (e) {
-                                    if (e.code == 'weak-password') {
-                                      print(
-                                          'The password provided is too weak.');
-                                    } else if (e.code ==
-                                        'email-already-in-use') {
-                                      setState(() {
-                                        warning =
-                                            'Email account already exists. Try another email.';
-                                      });
-
-                                      print(
-                                          'The account already exists for that email.');
-                                    }
-                                  }
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: ListTile(
-                                    title: Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                          left: 25.0,
-                                        ),
-                                        child: Text(
-                                          'Sign Up',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                    trailing: Icon(
-                                      Icons.arrow_forward,
-                                      size: 25,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            )
                           ],
                         ),
                       ),

@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:sample/components/allclass.dart';
 import 'package:sample/components/dashboardPages/Presentpage.dart';
+import 'package:sample/components/loadingSpinkit.dart';
 import 'package:sample/components/test.dart';
 import 'package:tab_indicator_styler/tab_indicator_styler.dart';
 import 'main_drawer.dart';
@@ -19,6 +20,7 @@ class dashboard extends StatefulWidget {
 
 class _dashboardState extends State<dashboard> {
   final textController = TextEditingController();
+  bool isloading = true;
   static List studentList = [],
       presentList = ['1', '1', '1', '1', '1'],
       result = [],
@@ -78,6 +80,7 @@ class _dashboardState extends State<dashboard> {
       setState(() {
         presentList = presentResult = gotresult;
         ctMarksResult = gotctresult;
+        isloading = false;
       });
     }
 
@@ -328,7 +331,7 @@ class _dashboardState extends State<dashboard> {
                               width: mwidth * .14,
                               child: Center(
                                 child: Text(
-                                  'A',
+                                  (cycle + 1).toString() + 'A',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 18,
@@ -372,7 +375,7 @@ class _dashboardState extends State<dashboard> {
                               height: mheight * .05,
                               child: Center(
                                 child: Text(
-                                  'B',
+                                  (cycle + 1).toString() + 'B',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 18,
@@ -399,7 +402,7 @@ class _dashboardState extends State<dashboard> {
                                       ))),
                               child: Center(
                                 child: Text(
-                                  'C',
+                                  (cycle + 1).toString() + 'C',
                                   style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -425,7 +428,7 @@ class _dashboardState extends State<dashboard> {
                                       ))),
                               child: Center(
                                 child: Text(
-                                  'D',
+                                  (cycle + 1).toString() + 'D',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 18,
@@ -452,7 +455,7 @@ class _dashboardState extends State<dashboard> {
                                       ))),
                               child: Center(
                                 child: Text(
-                                  'E',
+                                  (cycle + 1).toString() + 'E',
                                   style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -466,25 +469,27 @@ class _dashboardState extends State<dashboard> {
                       SizedBox(height: 2),
 
                       // LISTBUILDER:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-                      Container(
-                          height: mheight * .76,
-                          alignment: Alignment.topLeft,
-                          child: ListView.builder(
-                            scrollDirection: Axis.vertical,
-                            shrinkWrap: true,
-                            itemCount: studentList.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return EachRowofListView(
-                                  studentRoll: studentList[index],
-                                  index: index,
-                                  colorRollIndex:
-                                      colorList[((index % 30) / 2).toInt()],
-                                  presentList: presentList[index],
-                                  uuid: widget.uuid,
-                                  cycle: cycle,
-                                  studentRollList: presentResult);
-                            },
-                          ))
+                      isloading
+                          ? Loading()
+                          : Container(
+                              height: mheight * .77,
+                              alignment: Alignment.topLeft,
+                              child: ListView.builder(
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemCount: studentList.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return EachRowofListView(
+                                      studentRoll: studentList[index],
+                                      index: index,
+                                      colorRollIndex:
+                                          colorList[((index % 30) / 2).toInt()],
+                                      presentList: presentList[index],
+                                      uuid: widget.uuid,
+                                      cycle: cycle,
+                                      studentRollList: presentResult);
+                                },
+                              ))
                     ],
                   ),
                 ),
@@ -677,7 +682,7 @@ class _dashboardState extends State<dashboard> {
 
                       // LISTBUILDER:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
                       Container(
-                          height: mheight * .76,
+                          height: mheight * .8,
                           alignment: Alignment.topLeft,
                           child: ListView.builder(
                             scrollDirection: Axis.vertical,
